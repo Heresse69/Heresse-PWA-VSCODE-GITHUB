@@ -138,12 +138,39 @@ import { initialMockProfilesData } from '@/data/mockProfiles';
             return;
         }
         const lastAction = history[history.length - 1];
+        const direction = lastAction.direction;
+        
+        // Animation inverse avant de restaurer le profil
+        const reverseDirection = direction === 'right' ? 'left' : 'right';
+        const targetX = reverseDirection === 'right' ? "150%" : "-150%";
+        const finalRotate = reverseDirection === 'right' ? 25 : -25;
+        
+        // Démarrer l'animation inverse
+        topCardControls.set({ 
+          x: targetX, 
+          y: 0, 
+          opacity: 0, 
+          rotate: finalRotate, 
+          scale: 0.9 
+        });
+        
+        // Puis animer vers la position normale
+        topCardControls.start({ 
+          x: 0, 
+          y: 0, 
+          opacity: 1, 
+          rotate: 0, 
+          scale: 1,
+          transition: { 
+            duration: 0.5, 
+            ease: "easeOut" 
+          } 
+        });
         
         setCurrentIndex(prev => prev -1);
         setHistory(prev => prev.slice(0, -1));
         
         if (isMounted.current) {
-            topCardControls.set({ x: 0, y:0, opacity: 1, rotate: 0, scale: 1 });
             motionX.set(0);
             motionY.set(0);
             toast({ title: "Retour", description: `Le profil de ${lastAction.profile.name} a été restauré.` });
@@ -184,21 +211,21 @@ import { initialMockProfilesData } from '@/data/mockProfiles';
       }
 
       return (
-        <div className="relative w-full flex-grow max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto mt-[40px] mb-[80px] px-1 sm:px-2.5 flex items-center justify-center">
+        <div className="relative w-full h-screen flex flex-col bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
           <HomePageHeader 
-            isIncognito={currentUser.premiumStatus.incognitoMode}
-            onToggleIncognito={toggleIncognitoMode}
             onOpenFilters={() => navigate('/settings')}
           />
 
-          <div className="w-full flex-grow max-w-md relative flex-shrink-0 mt-[50px] mb-[90px] px-2.5">
-            <AnimatePresence>
-              {currentProfile && (
-                  <CardWrapper
-                    key={currentProfile.id}
-                    controls={topCardControls}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
+          {/* Zone principale centrée pour la carte avec espace pour les boutons */}
+          <div className="flex-1 flex flex-col justify-center px-2 pt-2 min-h-0">
+            <div className="w-full max-w-md aspect-[3/4] relative mx-auto flex-shrink-0">
+              <AnimatePresence>
+                {currentProfile && (
+                    <CardWrapper
+                      key={currentProfile.id}
+                      controls={topCardControls}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleDragEnd}
                     onDrag={(e, info) => { motionX.set(info.offset.x); motionY.set(info.offset.y); }}
                     isTopCard={true}
                     style={{ 
@@ -213,21 +240,26 @@ import { initialMockProfilesData } from '@/data/mockProfiles';
                     <ProfileCardComponent profile={currentProfile} isTopCard={true} onSwipe={triggerSwipe} isSwiping={isSwiping}/>
                   </CardWrapper>
                 )}
-            </AnimatePresence>
+              </AnimatePresence>
+            </div>
+            
+            {/* Boutons d'action ENTRE la carte et la navigation */}
+            {currentProfile && (
+              <div className="px-4 py-4 flex-shrink-0">
+                <ActionButtons
+                    onRewind={handleRewind}
+                    onSwipe={triggerSwipe}
+                    onBoost={handleBoost}
+                    canRewind={currentUser.premiumStatus.canRewind}
+                    canBoost={currentUser.premiumStatus.canBoost}
+                    isSwiping={isSwiping}
+                    historyLength={history.length}
+                    motionX={motionX}
+                    currentUser={currentUser}
+                />
+              </div>
+            )}
           </div>
-          
-          {currentProfile && (
-            <ActionButtons
-                onRewind={handleRewind}
-                onSwipe={triggerSwipe}
-                onBoost={handleBoost}
-                canRewind={currentUser.premiumStatus.canRewind}
-                canBoost={currentUser.premiumStatus.canBoost}
-                isSwiping={isSwiping}
-                historyLength={history.length}
-                motionX={motionX}
-            />
-          )}
 
           <AnimatePresence>
             {showMatchAnimation && matchedProfileData && currentUser && (

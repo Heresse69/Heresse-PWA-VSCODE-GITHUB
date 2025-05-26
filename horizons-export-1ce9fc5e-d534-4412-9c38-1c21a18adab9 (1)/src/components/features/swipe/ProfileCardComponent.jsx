@@ -34,8 +34,8 @@ import React, { useState } from 'react';
       const averageRating = profile.mediaSoldRating || 0;
 
       return (
-        <Card className="w-full h-full rounded-xl overflow-hidden shadow-xl bg-slate-900 border-slate-700 flex flex-col select-none max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto min-h-[400px] sm:min-h-[500px] md:min-h-[600px]">
-          <CardHeader className="p-0 relative flex-grow cursor-default min-h-[300px] sm:min-h-[400px] md:min-h-[500px]" onClick={!isSwiping ? handleImageTap : undefined}>
+        <Card className="w-full h-full rounded-xl overflow-hidden shadow-xl bg-slate-900 border-slate-700 flex flex-col select-none max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto min-h-[320px] sm:min-h-[380px] md:min-h-[450px]">
+          <CardHeader className="p-0 relative flex-grow cursor-default min-h-[240px] sm:min-h-[300px] md:min-h-[360px]" onClick={!isSwiping ? handleImageTap : undefined}>
             <AnimatePresence initial={false} mode="wait">
               <motion.img
                 key={profile.id + '-' + currentPhotoIndex}
@@ -62,30 +62,30 @@ import React, { useState } from 'react';
               ))}
             </div>
             
-            <div className="absolute bottom-0 left-0 right-0 p-2 pt-10 sm:p-4 sm:pt-16 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-white pointer-events-none">
-              <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+            <div className="absolute bottom-0 left-0 right-0 p-2 pt-6 sm:p-3 sm:pt-10 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-white pointer-events-none">
+              <div className="flex items-center justify-between mb-1 flex-wrap gap-1">
                 <Link 
                   to={`/profile/${profile.id}`} 
                   onClick={(e) => { e.stopPropagation(); if (onSwipe) onSwipe('info'); }}
                   className="pointer-events-auto focus:outline-none focus:ring-2 focus:ring-primary rounded"
                 >
-                  <h2 className="text-2xl sm:text-3xl font-bold drop-shadow-md">{profile.name} <span className="font-light text-2xl">{profile.age}</span></h2>
+                  <h2 className="text-xl sm:text-2xl font-bold drop-shadow-md">{profile.name} <span className="font-light text-lg sm:text-xl">{profile.age}</span></h2>
                 </Link>
               </div>
-              <div className="flex items-center text-xs sm:text-sm text-gray-300 mb-1 drop-shadow-sm flex-wrap gap-1">
+              <div className="flex items-center text-xs text-gray-300 mb-1 drop-shadow-sm flex-wrap gap-1">
                   <MapPin size={14} className="mr-1.5" /> {profile.city} ({profile.distance})
               </div>
               {currentPhotoIndex === profile.referencePhotoIndex && 
-                  <Badge variant="secondary" className="mb-1.5 bg-gradient-to-r from-green-500/80 to-emerald-600/80 text-white text-[10px] px-2 py-0.5 shadow-md backdrop-blur-sm border-none">
-                      <ShieldCheck size={11} className="mr-1"/>Photo Vérifiée
+                  <Badge variant="secondary" className="mb-1 bg-gradient-to-r from-green-500/80 to-emerald-600/80 text-white text-[9px] px-1.5 py-0.5 shadow-md backdrop-blur-sm border-none">
+                      <ShieldCheck size={10} className="mr-1"/>Photo Vérifiée
                   </Badge>
               }
               {averageRating > 0 && (
-                  <div className="flex items-center text-xs sm:text-sm text-gray-300 mb-1.5 drop-shadow-sm">
-                      <StarIcon size={14} className="mr-1.5 fill-yellow-400 text-yellow-400"/> {averageRating.toFixed(1)} <span className="ml-1">Note Média</span>
+                  <div className="flex items-center text-xs text-gray-300 mb-1 drop-shadow-sm">
+                      <StarIcon size={12} className="mr-1 fill-yellow-400 text-yellow-400"/> {averageRating.toFixed(1)} <span className="ml-1">Moyenne des médias</span>
                   </div>
               )}
-              <p className="text-xs sm:text-sm text-gray-200 line-clamp-2 leading-relaxed drop-shadow-sm">{profile.bio}</p>
+              <p className="text-xs text-gray-200 line-clamp-2 leading-relaxed drop-shadow-sm">{profile.bio}</p>
             </div>
           </CardHeader>
         </Card>

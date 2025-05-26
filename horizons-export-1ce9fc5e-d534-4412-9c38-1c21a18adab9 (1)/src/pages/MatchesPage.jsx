@@ -12,9 +12,9 @@ import StoryViewer from '@/components/StoryViewer';
     const StoryBubble = ({ story, isOwnStory, isAddButton }) => {
       if (isAddButton) {
         return (
-          <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center w-20">
-            <Button variant="outline" className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center">
-              <PlusCircle size={30} />
+          <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center w-24">
+            <Button variant="outline" className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center">
+              <PlusCircle size={32} />
             </Button>
             <span className="text-xs text-gray-300">Ajouter</span>
           </Link>
@@ -22,8 +22,8 @@ import StoryViewer from '@/components/StoryViewer';
       }
 
       return (
-        <Link to={`/stories/${story.id}`} className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center w-20">
-          <Avatar className={`w-16 h-16 sm:w-20 sm:h-20 border-2 ${!story.seen && !isOwnStory ? 'border-pink-500' : 'border-slate-600'}`}>
+        <Link to={`/stories/${story.id}`} className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center w-24">
+          <Avatar className={`w-20 h-20 sm:w-24 sm:h-24 border-2 ${!story.seen && !isOwnStory ? 'border-pink-500' : 'border-slate-600'}`}>
             <AvatarImage src={story.url} alt={story.userName} />
             <AvatarFallback className="bg-slate-600 text-lg">{story.userName.substring(0, 1)}</AvatarFallback>
           </Avatar>
@@ -109,8 +109,9 @@ import StoryViewer from '@/components/StoryViewer';
   );
 
   return (
-    <div className="p-4 pb-20 bg-gradient-to-b from-slate-900 to-slate-800 min-h-full text-white">
-      <div className="mb-6">
+    <div className="h-screen flex flex-col bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
+      {/* Section fixe en haut - Stories */}
+      <div className="flex-shrink-0 p-4 pb-2">
         <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories</h2>
         <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
           <StoryBubble isAddButton={true} />
@@ -124,42 +125,50 @@ import StoryViewer from '@/components/StoryViewer';
           ))}
         </div>
       </div>
-      <div className="relative mb-5">
-        <Input
-          type="text"
-          placeholder="Rechercher un match..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-pink-500 focus:border-pink-500 pl-10 rounded-full py-2.5"
-        />
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+
+      {/* Section fixe - Barre de recherche */}
+      <div className="flex-shrink-0 px-4 pb-4">
+        <div className="relative">
+          <Input
+            type="text"
+            placeholder="Rechercher un match..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-pink-500 focus:border-pink-500 pl-10 rounded-full py-2.5"
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        </div>
       </div>
-      {isStoryViewerOpen && (
-        <StoryViewer
-          stories={displayableStories}
-          initialIndex={currentStoryIndex}
-          onClose={closeStoryViewer}
-        />
-      )}
-      <div>
-        <h2 className="text-lg font-semibold text-white mb-3">Vos Matchs ({filteredProfiles.length})</h2>
-        {filteredProfiles.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4">
-            {filteredProfiles.map((profile, index) => (
-              <MatchCard key={profile.id} profile={profile} index={index} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center text-center text-gray-400 pt-10">
-            <Heart size={64} className="mb-4 opacity-50 text-pink-500/70" />
-            <h2 className="text-xl font-semibold text-white mb-2">
-              {searchTerm ? `Aucun match trouvé pour "${searchTerm}"` : "Aucun match pour le moment"}
-            </h2>
-            <p className="text-sm">
-              {searchTerm ? "Essayez un autre terme de recherche." : "Continuez à swiper pour trouver des matchs !"}
-            </p>
-          </div>
+
+      {/* Section scrollable - Liste des matchs */}
+      <div className="flex-1 px-4 pb-20 overflow-y-auto">
+        {isStoryViewerOpen && (
+          <StoryViewer
+            stories={displayableStories}
+            initialIndex={currentStoryIndex}
+            onClose={closeStoryViewer}
+          />
         )}
+        <div>
+          <h2 className="text-lg font-semibold text-white mb-3">Vos Matchs ({filteredProfiles.length})</h2>
+          {filteredProfiles.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4">
+              {filteredProfiles.map((profile, index) => (
+                <MatchCard key={profile.id} profile={profile} index={index} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center text-gray-400 pt-10">
+              <Heart size={64} className="mb-4 opacity-50 text-pink-500/70" />
+              <h2 className="text-xl font-semibold text-white mb-2">
+                {searchTerm ? `Aucun match trouvé pour "${searchTerm}"` : "Aucun match pour le moment"}
+              </h2>
+              <p className="text-sm">
+                {searchTerm ? "Essayez un autre terme de recherche." : "Continuez à swiper pour trouver des matchs !"}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

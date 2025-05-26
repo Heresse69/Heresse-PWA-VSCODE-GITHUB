@@ -4,8 +4,8 @@ import React, { useState } from 'react';
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import { useToast } from '@/components/ui/use-toast';
-    import { motion } from 'framer-motion';
-    import { Wallet, CreditCard, ChevronLeft, Info, Percent } from 'lucide-react';
+    import { motion, AnimatePresence } from 'framer-motion';
+    import { Wallet, CreditCard, ChevronLeft, Info, Percent, DollarSign, X } from 'lucide-react';
     import { useUser } from '@/contexts/UserContext';
     import { cn } from '@/lib/utils';
 
@@ -14,6 +14,8 @@ import React, { useState } from 'react';
       const { toast } = useToast();
       const { currentUser, updateWalletBalance } = useUser();
       const [rechargeAmount, setRechargeAmount] = useState(20); // Default recharge amount
+      const [withdrawAmount, setWithdrawAmount] = useState('');
+      const [showWithdrawModal, setShowWithdrawModal] = useState(false);
       const VAT_RATE = 0.20; // 20% TVA
 
       const quickRechargeAmounts = [5, 10, 20, 50, 100];
@@ -35,6 +37,33 @@ import React, { useState } from 'react';
             title: "Portefeuille rechargé!",
             description: `${rechargeAmount.toFixed(2)}€ (HT) ont été ajoutés à votre portefeuille.`,
             className: "bg-green-500 text-white border-green-600"
+          });
+        }, 2000);
+      };
+
+      const handleWithdraw = () => {
+        const amount = parseFloat(withdrawAmount);
+        if (!amount || amount < 20) {
+          toast({ title: "Montant invalide", description: "Le montant minimum de retrait est de 20€.", variant: "destructive" });
+          return;
+        }
+        if (amount > currentUser.walletBalance) {
+          toast({ title: "Solde insuffisant", description: "Le montant demandé dépasse votre solde actuel.", variant: "destructive" });
+          return;
+        }
+        // Simulate withdrawal process
+        toast({
+          title: "Demande de retrait en cours...",
+          description: `Traitement de votre demande de retrait de ${amount.toFixed(2)}€.`,
+        });
+        setTimeout(() => {
+          updateWalletBalance(-amount); // Subtract amount from balance
+          setWithdrawAmount('');
+          setShowWithdrawModal(false);
+          toast({
+            title: "Retrait effectué!",
+            description: `${amount.toFixed(2)}€ ont été retirés de votre portefeuille.`,
+            className: "bg-blue-500 text-white border-blue-600"
           });
         }, 2000);
       };
@@ -94,18 +123,100 @@ import React, { useState } from 'react';
             </div>
              <p className="text-[10px] text-gray-400 text-center flex items-center justify-center"><Info size={12} className="mr-1 text-primary shrink-0"/>Transactions sécurisées via Stripe (simulation).</p>
 
-
             <Button onClick={handleRecharge} className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-base py-2.5 rounded-full shadow-lg h-auto">
               <CreditCard size={18} className="mr-2"/> Payer {totalAmountWithVAT > 0 ? `${totalAmountWithVAT.toFixed(2)}€` : ''}
             </Button>
             <p className="text-center text-[10px] text-gray-400">Options de paiement simulées : CB, Stripe, Apple Pay, Google Pay.</p>
           </div>
 
+          {/* Bandeau de retrait des fonds */}
+          <Button 
+            onClick={() => setShowWithdrawModal(true)} 
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:opacity-90 text-base py-2.5 rounded-full shadow-lg h-auto"
+          >
+            <DollarSign size={18} className="mr-2"/> Retirer des fonds
+          </Button>
+
           <div className="text-center mt-4">
             <Button variant="link" onClick={() => navigate(-1)} className="text-gray-300 hover:text-white text-xs h-auto">
               <ChevronLeft size={16} className="mr-0.5" /> Retour
             </Button>
           </div>
+
+          {/* Modal de retrait avec transparence */}
+          <AnimatePresence>
+            {showWithdrawModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                onClick={() => setShowWithdrawModal(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="bg-slate-800/95 backdrop-blur-md border border-slate-600 rounded-xl p-6 w-full max-w-sm mx-auto shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">Retirer des fonds</h3>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowWithdrawModal(false)}
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                    >
+                      <X size={18} />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="withdrawAmount" className="text-gray-300 text-sm mb-2 block">
+                        Montant à retirer (min. 20€)
+                      </Label>
+                      <Input 
+                        id="withdrawAmount" 
+                        type="number" 
+                        value={withdrawAmount} 
+                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                        min="20"
+                        max={currentUser.walletBalance}
+                        placeholder="Ex: 50"
+                        className="bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        Solde disponible: {currentUser.walletBalance.toFixed(2)}€
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowWithdrawModal(false)}
+                        className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700"
+                      >
+                        Annuler
+                      </Button>
+                      <Button 
+                        onClick={handleWithdraw} 
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:opacity-90"
+                        disabled={!withdrawAmount || parseFloat(withdrawAmount) < 20 || parseFloat(withdrawAmount) > currentUser.walletBalance}
+                      >
+                        Confirmer
+                      </Button>
+                    </div>
+                    
+                    <p className="text-center text-xs text-gray-400">
+                      Les retraits sont traités sous 2-3 jours ouvrés.
+                    </p>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       );
     };

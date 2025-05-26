@@ -17,6 +17,7 @@ import React from 'react';
     import StatsDashboardPage from '@/pages/StatsDashboardPage';
     import PremiumModesPage from '@/pages/PremiumModesPage';
     import MyPhotosPage from '@/pages/MyPhotosPage';
+    import WithdrawFundsPage from '@/pages/WithdrawFundsPage';
     import ProtectedRoute from '@/components/ProtectedRoute';
     import MainLayout from '@/components/layouts/MainLayout';
     import { UserProvider } from '@/contexts/UserContext';
@@ -137,6 +138,7 @@ import React from 'react';
               <Route path="/profile/:userId/gallery/:galleryId" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><UserPrivateGalleryPage /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><SettingsPage /></ProtectedRoute>} />
               <Route path="/wallet" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><WalletPage /></ProtectedRoute>} />
+              <Route path="/withdraw-funds" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><WithdrawFundsPage /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><StatsDashboardPage /></ProtectedRoute>} />
               <Route path="/premium" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><PremiumModesPage /></ProtectedRoute>} />
               <Route path="/stories/create" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><CreateStoryPage /></ProtectedRoute>} />

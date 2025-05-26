@@ -9,9 +9,9 @@ import React from 'react';
     import { cn } from '@/lib/utils';
 
     const ActionButton = ({ icon: Icon, label, onClick, className, bgColor = "bg-slate-800/60 hover:bg-slate-700/80" }) => (
-      <Button variant="ghost" className={cn(`flex flex-col items-center justify-center h-16 w-full rounded-xl space-y-0.5 text-gray-300 hover:text-white transition-all duration-200 shadow-md p-1`, bgColor, className)} onClick={onClick} >
-        <Icon size={20} className="mb-0.5 text-primary" />
-        <span className="text-[10px] text-center px-0.5 leading-tight">{label}</span>
+      <Button variant="ghost" className={cn(`flex flex-col items-center justify-center h-18 sm:h-20 w-full rounded-xl space-y-1 text-gray-300 hover:text-white transition-all duration-200 shadow-md p-2`, bgColor, className)} onClick={onClick} >
+        <Icon size={18} className="mb-1 text-primary" />
+        <span className="text-[9px] sm:text-[10px] text-center px-1 leading-tight">{label}</span>
       </Button>
     );
 
@@ -76,27 +76,27 @@ import React from 'react';
       };
 
       return (
-        <div className="p-1 pt-4 space-y-3 bg-gradient-to-b from-background to-slate-900 text-white min-h-full overflow-y-auto no-scrollbar pb-16">
+        <div className="h-screen flex flex-col p-1 pt-4 space-y-3 bg-gradient-to-b from-background to-slate-900 text-white overflow-y-auto no-scrollbar pb-20">
           <motion.div 
             initial={{ opacity: 0, y: -15 }} 
             animate={{ opacity: 1, y: 0 }} 
             transition={{ duration: 0.3 }} 
-            className="relative flex flex-col items-center"
+            className="relative flex flex-col items-center flex-shrink-0"
           >
             <button onClick={handleProfilePictureClick} className="relative focus:outline-none group">
-                <Avatar className="w-32 h-32 sm:w-36 sm:h-36 border-[6px] border-primary shadow-xl group-hover:border-pink-500 transition-all duration-300"> 
+                <Avatar className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 border-[6px] border-primary shadow-xl group-hover:border-pink-500 transition-all duration-300"> 
                     <AvatarImage src={currentUser.profilePicture || `https://ui-avatars.com/api/?name=${userFirstName}&background=random`} alt={userFirstName} /> 
-                    <AvatarFallback className="bg-primary-hover text-4xl">{userFirstName.substring(0,1).toUpperCase()}</AvatarFallback> 
+                    <AvatarFallback className="bg-primary-hover text-3xl sm:text-4xl">{userFirstName.substring(0,1).toUpperCase()}</AvatarFallback> 
                 </Avatar>
                 <div className="absolute bottom-1 right-1 bg-slate-700 p-2 rounded-full border-2 border-background group-hover:bg-pink-500 transition-all duration-300">
-                    <Edit3 size={16} className="text-primary group-hover:text-white transition-all duration-300" />
+                    <Edit3 size={14} className="text-primary group-hover:text-white transition-all duration-300" />
                 </div>
             </button>
-            <h3 className="mt-3 text-2xl font-bold text-gradient-heresse">{userFirstName}</h3>
+            <h3 className="mt-3 text-xl sm:text-2xl font-bold text-gradient-heresse">{userFirstName}</h3>
             <p className="text-xs text-gray-400 max-w-[85%] text-center line-clamp-2">{currentUser.bio || "Aucune bio pour le moment."}</p>
           </motion.div>
 
-          <div className="grid grid-cols-4 gap-1.5 px-2">
+          <div className="grid grid-cols-4 gap-2 px-2 flex-shrink-0">
             <ActionButton icon={BarChart3} label="Tableau de bord" onClick={() => navigate('/dashboard')} />
             <ActionButton icon={Wallet} label="Portefeuille" onClick={() => navigate('/wallet')} />
             <ActionButton 
@@ -109,7 +109,7 @@ import React from 'react';
             <ActionButton icon={Settings} label="Paramètres" onClick={() => navigate('/settings')} />
           </div>
           
-          <div className="px-2 space-y-2.5 pt-2">
+          <div className="px-2 space-y-2.5 pt-2 flex-1">
             <PremiumBanner 
                 title="Mode Incognito"
                 description="Soyez visible uniquement par les profils que vous avez préalablement likés."
