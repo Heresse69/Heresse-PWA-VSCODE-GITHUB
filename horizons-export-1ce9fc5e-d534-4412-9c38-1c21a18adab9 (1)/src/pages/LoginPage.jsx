@@ -6,6 +6,7 @@ import React, { useState } from 'react';
     import { useToast } from '@/components/ui/use-toast';
     import { motion } from 'framer-motion';
     import { Mail, Lock, Phone } from 'lucide-react';
+    import { authenticateUser, authenticateUserBySMS } from '@/utils/userDatabase';
 
     const LoginPage = ({ onLogin }) => {
       const [loginMethod, setLoginMethod] = useState('email'); 
@@ -23,15 +24,18 @@ import React, { useState } from 'react';
           toast({ title: 'Erreur', description: 'Veuillez remplir tous les champs.', variant: 'destructive' });
           return;
         }
-    const userExists = true;
-    if (userExists) {
-        setTimeout(() => {
-          toast({ title: 'Connexion réussie!', description: 'Bienvenue de retour!' });
-          onLogin(); 
-        }, 1000);
+
+        // Authentifier l'utilisateur avec la base de données simulée
+        const authResult = authenticateUser(email, password);
+        
+        if (authResult.success) {
+          setTimeout(() => {
+            toast({ title: 'Connexion réussie!', description: 'Bienvenue de retour!' });
+            onLogin(authResult.user); // Passer les données utilisateur
+          }, 1000);
         } else { 
-      toast({ title: 'Erreur', description: 'Compte non reconnu.', variant: 'destructive' });
-          }
+          toast({ title: 'Erreur', description: authResult.error, variant: 'destructive' });
+        }
       };
 
   const handleSmsSubmit = (e) => {
@@ -41,17 +45,30 @@ import React, { useState } from 'react';
         toast({ title: 'Erreur', description: 'Veuillez entrer votre numéro de téléphone.', variant: 'destructive' });
         return;
       }
-      setSmsSent(true);
-      toast({ title: 'Code SMS envoyé (simulation)', description: 'Un code a été envoyé à votre numéro.' });
+      
+      // Vérifier si l'utilisateur existe avec ce numéro
+      const authResult = authenticateUserBySMS(phoneNumber);
+      
+      if (authResult.success) {
+        setSmsSent(true);
+        toast({ title: 'Code SMS envoyé (simulation)', description: 'Un code a été envoyé à votre numéro.' });
+      } else {
+        toast({ title: 'Erreur', description: authResult.error, variant: 'destructive' });
+      }
     } else {
       if (!smsCode || smsCode.length < 4) {
         toast({ title: 'Erreur', description: 'Veuillez entrer un code valide.', variant: 'destructive' });
         return;
       }
-      setTimeout(() => {
-        toast({ title: 'Connexion réussie!', description: 'Bienvenue de retour!' });
-        onLogin();
-      }, 1000);
+      
+      // Récupérer les données utilisateur et se connecter
+      const authResult = authenticateUserBySMS(phoneNumber);
+      if (authResult.success) {
+        setTimeout(() => {
+          toast({ title: 'Connexion réussie!', description: 'Bienvenue de retour!' });
+          onLogin(authResult.user);
+        }, 1000);
+      }
     }
     };
 

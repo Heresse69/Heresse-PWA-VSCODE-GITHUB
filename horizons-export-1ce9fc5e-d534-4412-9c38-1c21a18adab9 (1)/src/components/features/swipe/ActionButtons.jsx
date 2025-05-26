@@ -43,12 +43,12 @@ const ActionButton = ({ icon: Icon, onClick, disabled, className, motionStyle, a
   };
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center py-2 px-2 sm:py-4 sm:px-4 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10 gap-2 sm:gap-4 w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
+    <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center py-4 px-6 sm:py-4 sm:px-4 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10 gap-4 sm:gap-4 w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
       <ActionButton
         icon={X}
         onClick={() => onSwipe('left')}
         disabled={isSwiping && motionX.get() > 0}
-        className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-rose-500/80 to-red-600/80 hover:from-rose-500 hover:to-red-600 border-2 border-rose-400/70 text-white shadow-2xl backdrop-blur-md transition-all duration-150 ease-out hover:shadow-rose-500/40 active:scale-95"
+        className="w-16 h-16 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-rose-500/80 to-red-600/80 hover:from-rose-500 hover:to-red-600 border-2 border-rose-400/70 text-white shadow-2xl backdrop-blur-md transition-all duration-150 ease-out hover:shadow-rose-500/40 active:scale-95"
         motionStyle={{ opacity: isSwiping ? dislikeOpacity : 1, scale: isSwiping ? dislikeScale : 1 }}
         ariaLabel="Dislike profile"
       />
@@ -56,15 +56,15 @@ const ActionButton = ({ icon: Icon, onClick, disabled, className, motionStyle, a
         icon={Undo}
         onClick={onRewind}
         disabled={!canRewind || historyLength === 0 || isSwiping}
-        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20 border-yellow-500/80 text-yellow-500 hover:text-yellow-400 shadow-xl backdrop-blur-sm"
+        className="w-12 h-12 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20 border-yellow-500/80 text-yellow-500 hover:text-yellow-400 shadow-xl backdrop-blur-sm"
         ariaLabel="Rewind last swipe"
       />
       <motion.div>
         <Button
           onClick={handleToggleIncognito}
-          className={`${isIncognito ? 'bg-blue-500' : 'bg-gray-600'} hover:${isIncognito ? 'bg-blue-600' : 'bg-gray-700'} text-white p-3 sm:p-4 md:p-5 rounded-full shadow-lg`}
+          className={`${isIncognito ? 'bg-blue-500' : 'bg-gray-600'} hover:${isIncognito ? 'bg-blue-600' : 'bg-gray-700'} text-white p-3 sm:p-4 md:p-5 rounded-full shadow-lg w-12 h-12 sm:w-12 sm:h-12 md:w-14 md:h-14`}
         >
-          <EyeOff size={24} />
+          <EyeOff size={20} />
         </Button>
         {showConfirmation && (
           <AnimatePresence>
@@ -87,7 +87,7 @@ const ActionButton = ({ icon: Icon, onClick, disabled, className, motionStyle, a
         icon={Heart}
         onClick={() => onSwipe('right')}
         disabled={isSwiping && motionX.get() < 0}
-        className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-emerald-500/80 to-green-600/80 hover:from-emerald-500 hover:to-green-600 border-2 border-emerald-400/70 text-white shadow-2xl backdrop-blur-md transition-all duration-150 ease-out hover:shadow-emerald-500/40 active:scale-95"
+        className="w-16 h-16 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-emerald-500/80 to-green-600/80 hover:from-emerald-500 hover:to-green-600 border-2 border-emerald-400/70 text-white shadow-2xl backdrop-blur-md transition-all duration-150 ease-out hover:shadow-emerald-500/40 active:scale-95"
         motionStyle={{ opacity: isSwiping ? likeOpacity : 1, scale: isSwiping ? likeScale : 1 }}
         ariaLabel="Like profile"
       />

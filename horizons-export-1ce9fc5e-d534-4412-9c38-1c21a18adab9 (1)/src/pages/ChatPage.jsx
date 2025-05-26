@@ -2,6 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
     import { useParams, useNavigate } from 'react-router-dom';
     import { useToast } from '@/components/ui/use-toast';
     import { useUser } from '@/contexts/UserContext';
+    import { Link } from 'react-router-dom';
+    import { PlusCircle } from 'lucide-react';
+    import { Button } from '@/components/ui/button';
+    import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
     import ChatHeader from '@/components/chat/ChatHeader';
     import ChatInputArea from '@/components/chat/ChatInputArea';
@@ -11,10 +15,35 @@ import React, { useState, useEffect, useCallback } from 'react';
     import SendMediaModal from '@/components/chat/modals/SendMediaModal';
     import ChatList from '@/components/chat/ChatList';
     import FullScreenMediaViewer from '@/components/chat/FullScreenMediaViewer';
+    import { Input } from '@/components/ui/input';
+    import { Search } from 'lucide-react';
     
     import useChatLogic from '@/hooks/useChatLogic';
     import useChatModals from '@/hooks/useChatModals';
     import { mockMatchesData } from '@/data/mockChatData';
+
+    const StoryBubble = ({ story, isOwnStory, isAddButton }) => {
+      if (isAddButton) {
+        return (
+          <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center w-20">
+            <Button variant="outline" className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center">
+              <PlusCircle size={30} />
+            </Button>
+            <span className="text-xs text-gray-300">Ajouter</span>
+          </Link>
+        );
+      }
+
+      return (
+        <Link to={`/stories/${story.id}`} className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center w-20">
+          <Avatar className={`w-16 h-16 sm:w-20 sm:h-20 border-2 ${!story.seen && !isOwnStory ? 'border-pink-500' : 'border-slate-600'}`}>
+            <AvatarImage src={story.url} alt={story.userName} />
+            <AvatarFallback className="bg-slate-600 text-lg">{story.userName.substring(0, 1)}</AvatarFallback>
+          </Avatar>
+          <span className="text-xs text-gray-300 truncate w-full">{isOwnStory ? 'Ma Story' : story.userName}</span>
+        </Link>
+      );
+    };
 
     const ChatPage = () => {
       const { matchId } = useParams();
@@ -312,14 +341,38 @@ import React, { useState, useEffect, useCallback } from 'react';
         ); 
     }
 
-      return ( 
-        <div className="h-full">
-            <ChatList 
-                matches={filteredMatches}
-                userStories={displayableStories}
-                searchTerm={searchTerm}
-                onSearchTermChange={setSearchTerm}
+      return (
+        <div className="p-4 pb-20 bg-gradient-to-b from-slate-900 to-slate-800 min-h-full text-white">
+          <div className="mb-6">
+            <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories</h2>
+            <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+              <StoryBubble isAddButton={true} />
+              {(displayableStories || []).map((story, index) => (
+                <div key={story.id}>
+                  <StoryBubble
+                    story={story}
+                    isOwnStory={story.isOwnStory || (currentUser && story.userId === currentUser.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="relative mb-5">
+            <Input
+              type="text"
+              placeholder="Rechercher une conversation..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-pink-500 focus:border-pink-500 pl-10 rounded-full py-2.5"
             />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          </div>
+          <ChatList 
+            matches={filteredMatches}
+            userStories={displayableStories}
+            searchTerm={searchTerm}
+            onSearchTermChange={setSearchTerm}
+          />
         </div>
       );
     };

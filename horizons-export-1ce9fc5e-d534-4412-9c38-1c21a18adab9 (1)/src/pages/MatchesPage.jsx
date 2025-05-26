@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-    import { Link } from 'react-router-dom';
-    import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Heart, MessageSquare, Search, PlusCircle } from 'lucide-react';
-    import { Input } from '@/components/ui/input';
-    import { Button } from '@/components/ui/button';
-    import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-    import { useUser } from '@/contexts/UserContext'; 
-    import { mockMatchesData as initialMockMatchedProfiles } from '@/data/mockChatData'; 
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useUser } from '@/contexts/UserContext'; 
+import { mockMatchesData as initialMockMatchedProfiles } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
 
     const StoryBubble = ({ story, isOwnStory, isAddButton }) => {
@@ -124,7 +124,6 @@ import StoryViewer from '@/components/StoryViewer';
           ))}
         </div>
       </div>
-
       <div className="relative mb-5">
         <Input
           type="text"
@@ -135,14 +134,13 @@ import StoryViewer from '@/components/StoryViewer';
         />
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
       </div>
-
       {isStoryViewerOpen && (
         <StoryViewer
           stories={displayableStories}
           initialIndex={currentStoryIndex}
           onClose={closeStoryViewer}
         />
-        )}
+      )}
       <div>
         <h2 className="text-lg font-semibold text-white mb-3">Vos Matchs ({filteredProfiles.length})</h2>
         {filteredProfiles.length > 0 ? (

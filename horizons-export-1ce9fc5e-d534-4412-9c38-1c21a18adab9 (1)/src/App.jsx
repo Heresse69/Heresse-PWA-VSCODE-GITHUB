@@ -22,53 +22,80 @@ import React from 'react';
     import CreateStoryPage from '@/pages/CreateStoryPage';
     import ViewStoryPage from '@/pages/ViewStoryPage';
     import KycPage from '@/pages/KycPage';
+    import { initializeUserDatabase, getUserById, updateUserKycStatus } from '@/utils/userDatabase';
 
     const AppContent = () => {
       const navigate = useReactRouterNavigate(); 
       const [isAuthenticated, setIsAuthenticated] = React.useState(false);
       const [isKycComplete, setIsKycComplete] = React.useState(false);
+      const [currentUser, setCurrentUser] = React.useState(null);
       const [isLoading, setIsLoading] = React.useState(true);
 
       React.useEffect(() => {
+        // Initialiser la base de données utilisateurs
+        initializeUserDatabase();
+        
         const token = localStorage.getItem('token');
-        const kycStatus = localStorage.getItem('kycComplete');
-        setIsAuthenticated(!!token);
-        setIsKycComplete(!!kycStatus);
+        const userId = localStorage.getItem('currentUserId');
+        
+        if (token && userId) {
+          const user = getUserById(userId);
+          if (user) {
+            setIsAuthenticated(true);
+            setCurrentUser(user);
+            setIsKycComplete(user.kycComplete);
+          } else {
+            // Si l'utilisateur n'existe pas, nettoyer le localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('currentUserId');
+          }
+        }
+        
         setIsLoading(false);
       }, []);
 
-      const handleLogin = () => {
+      const handleLogin = (user) => {
         localStorage.setItem('token', 'fake-token'); 
+        localStorage.setItem('currentUserId', user.id);
         setIsAuthenticated(true);
-        const kycStatusFromStorage = !!localStorage.getItem('kycComplete');
-        setIsKycComplete(kycStatusFromStorage);
+        setCurrentUser(user);
+        setIsKycComplete(user.kycComplete);
         
-        if (kycStatusFromStorage) {
+        // Les utilisateurs existants avec KYC validé vont directement à la page d'accueil
+        if (user.kycComplete) {
           navigate('/'); 
         } else {
+          // Les utilisateurs existants sans KYC doivent le compléter
           navigate('/kyc'); 
         }
       };
       
       const handleKycComplete = () => {
-        localStorage.setItem('kycComplete', 'true');
-        setIsKycComplete(true);
+        if (currentUser) {
+          // Mettre à jour le statut KYC dans la base de données
+          updateUserKycStatus(currentUser.id, true);
+          setIsKycComplete(true);
+          // Mettre à jour l'utilisateur local
+          setCurrentUser({ ...currentUser, kycComplete: true });
+        }
         navigate('/'); 
       };
 
       const handleLogout = () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('kycComplete');
+        localStorage.removeItem('currentUserId');
         setIsAuthenticated(false);
         setIsKycComplete(false);
+        setCurrentUser(null);
         navigate('/landing'); 
       };
       
-      const handleSignup = () => {
+      const handleSignup = (newUser) => {
         localStorage.setItem('token', 'fake-token'); 
-        localStorage.removeItem('kycComplete'); 
+        localStorage.setItem('currentUserId', newUser.id);
         setIsAuthenticated(true);
-        setIsKycComplete(false); 
+        setCurrentUser(newUser);
+        setIsKycComplete(false); // Les nouveaux utilisateurs doivent toujours faire le KYC
         navigate('/kyc'); 
       }
 

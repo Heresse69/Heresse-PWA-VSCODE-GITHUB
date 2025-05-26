@@ -7,6 +7,7 @@ import React, { useState } from 'react';
     import { useToast } from '@/components/ui/use-toast';
     import { motion } from 'framer-motion';
     import { Mail, Lock, CalendarDays, Phone } from 'lucide-react';
+    import { createUser } from '@/utils/userDatabase';
 
     const SignupPage = ({ onSignup }) => {
       const [email, setEmail] = useState('');
@@ -45,10 +46,24 @@ import React, { useState } from 'react';
             return;
         }
         
-        setTimeout(() => {
-          toast({ title: 'Inscription Initiée!', description: 'Veuillez compléter la vérification KYC.' });
-          onSignup(); 
-        }, 1000);
+        // Créer le nouvel utilisateur
+        const userData = {
+          email,
+          password,
+          phone: phoneNumber || null,
+          birthDate
+        };
+        
+        const result = createUser(userData);
+        
+        if (result.success) {
+          setTimeout(() => {
+            toast({ title: 'Inscription Initiée!', description: 'Veuillez compléter la vérification KYC.' });
+            onSignup(result.user); 
+          }, 1000);
+        } else {
+          toast({ title: 'Erreur', description: result.error, variant: 'destructive' });
+        }
       };
 
       return (
