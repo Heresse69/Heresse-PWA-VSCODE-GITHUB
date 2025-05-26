@@ -147,31 +147,33 @@ const ChatPage = () => {
   const totalUnreadMessages = chatList.reduce((total, chat) => total + chat.unread, 0);
 
   return (
-    <div className="p-4 pb-20 bg-gradient-to-b from-slate-900 to-slate-800 min-h-full text-white">
-      <div className="mb-6">
-        <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories</h2>
-        <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
-          <StoryBubble isAddButton={true} />
-          {(displayableStories || []).map((story, index) => (
-            <div key={story.id} onClick={() => openStoryViewer(index)}>
-              <StoryBubble
-                story={story}
-                isOwnStory={story.isOwnStory || (currentUser && story.userId === currentUser.id)}
-              />
-            </div>
-          ))}
+    <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
+      <div className="flex-shrink-0 p-4 pb-0">
+        <div className="mb-6">
+          <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories</h2>
+          <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+            <StoryBubble isAddButton={true} />
+            {(displayableStories || []).map((story, index) => (
+              <div key={story.id} onClick={() => openStoryViewer(index)}>
+                <StoryBubble
+                  story={story}
+                  isOwnStory={story.isOwnStory || (currentUser && story.userId === currentUser.id)}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="relative mb-5">
-        <Input
-          type="text"
-          placeholder="Rechercher une conversation..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-pink-500 focus:border-pink-500 pl-10 rounded-full py-2.5"
-        />
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <div className="relative mb-5">
+          <Input
+            type="text"
+            placeholder="Rechercher une conversation..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-pink-500 focus:border-pink-500 pl-10 rounded-full py-2.5"
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        </div>
       </div>
 
       {isStoryViewerOpen && (
@@ -182,7 +184,7 @@ const ChatPage = () => {
         />
       )}
 
-      <div>
+      <div className="flex-1 overflow-y-auto px-4 pb-20">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-white">
             Messages ({sortedChats.length})
@@ -195,7 +197,7 @@ const ChatPage = () => {
         </div>
 
         {sortedChats.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-3 pb-4">
             {sortedChats.map((chat, index) => (
               <ChatCard key={chat.id} chat={chat} index={index} />
             ))}

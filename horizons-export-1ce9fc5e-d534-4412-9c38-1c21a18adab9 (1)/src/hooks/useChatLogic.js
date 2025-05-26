@@ -50,4 +50,5 @@ import { useState, useEffect } from 'react';
       return { matches, setMatches, currentChat, setCurrentChat, addMessageToChat };
     };
 
+    export { useChatLogic };
     export default useChatLogic;

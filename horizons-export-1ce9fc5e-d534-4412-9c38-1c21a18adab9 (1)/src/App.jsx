@@ -6,6 +6,7 @@ import React from 'react';
     import SignupPage from '@/pages/SignupPage';
     import HomePage from '@/pages/HomePage';
     import ChatPage from '@/pages/ChatPage';
+    import ChatPageConversation from '@/pages/ChatPage_new';
     import ProfilePage from '@/pages/ProfilePage';
     import UserProfilePage from '@/pages/UserProfilePage'; 
     import MatchesPage from '@/pages/MatchesPage';
@@ -128,7 +129,7 @@ import React from 'react';
               <Route path="/" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><HomePage /></ProtectedRoute>} />
               <Route path="/matches" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><MatchesPage /></ProtectedRoute>} />
               <Route path="/chat" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><ChatPage /></ProtectedRoute>} />
-              <Route path="/chat/:matchId" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><ChatPage /></ProtectedRoute>} />
+              <Route path="/chat/:matchId" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><ChatPageConversation /></ProtectedRoute>} />
               <Route path="/galleries" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><PrivateGalleriesPage /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><ProfilePage onLogout={handleLogout} /></ProtectedRoute>} />
               <Route path="/profile/my-photos" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><MyPhotosPage /></ProtectedRoute>} />

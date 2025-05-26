@@ -55,4 +55,5 @@ import { useState } from 'react';
       };
     };
 
+    export { useChatModals };
     export default useChatModals;
