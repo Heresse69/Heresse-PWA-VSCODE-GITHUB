@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MessageSquare, Search, PlusCircle, Heart } from 'lucide-react';
+import { MessageSquare, Search, PlusCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,38 +10,69 @@ import { useUser } from '@/contexts/UserContext';
 import { mockMatchesData as initialChatData } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
 
-const StoryBubble = ({ story, isOwnStory, isAddButton }) => {
-  if (isAddButton) {
-    return (
-      <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '90px', minWidth: '90px'}}>
-        <Button variant="outline" className="rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center" style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px', borderWidth: '2px', borderColor: 'gray'}}>
-          <PlusCircle size={32} />
-        </Button>
-        <span className="text-xs text-gray-300">Ajouter</span>
-      </Link>
-    );
-  }
-
-  const isUnseen = !story.seen && !isOwnStory;
-
+// Composant Stories avec contours colorés intégré directement
+const StoriesSection = ({ stories, currentUser, onStoryClick }) => {
+  console.log('🎯 StoriesSection rendu avec', stories.length, 'stories:', stories);
+  
   return (
-    <Link to={`/stories/${story.id}`} className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '90px', minWidth: '90px'}}>
-      <div className="relative">
-        <div 
-          className={`rounded-full p-1 ${isUnseen ? 'story-gradient-ring' : 'bg-gray-600'}`}
-          style={{width: '90px', height: '90px'}}
-        >
-          <Avatar 
-            className="relative z-10 border-2 border-slate-900" 
-            style={{width: '82px', height: '82px', minWidth: '82px', minHeight: '82px'}}
-          >
-            <AvatarImage src={story.url} alt={story.userName} />
-            <AvatarFallback className="bg-slate-600" style={{fontSize: '18px'}}>{story.userName.substring(0, 1)}</AvatarFallback>
-          </Avatar>
-        </div>
+    <div className="mb-3">
+      <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories ({stories.length})</h2>
+      <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+        {/* Bouton Ajouter */}
+        <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '90px', minWidth: '90px'}}>
+          <Button variant="outline" className="rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center" style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px', borderWidth: '2px'}}>
+            <PlusCircle size={32} />
+          </Button>
+          <span className="text-xs text-gray-300">Ajouter</span>
+        </Link>
+        
+        {/* Stories avec contours pour les non vues */}
+        {stories.map((story, index) => {
+          const isOwnStory = story.isOwnStory || (currentUser && story.userId === currentUser.id);
+          const shouldShowBorder = !story.seen && !isOwnStory; // Contour seulement pour stories non vues
+          
+          console.log(`Story ${story.userName}: isOwnStory=${isOwnStory}, seen=${story.seen}, shouldShowBorder=${shouldShowBorder}`);
+          
+          return (
+            <div 
+              key={story.id}
+              className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center cursor-pointer" 
+              style={{width: '90px', minWidth: '90px'}}
+              onClick={() => onStoryClick(index)}
+            >
+              <div className="relative">
+                {shouldShowBorder && (
+                  <div 
+                    className="absolute inset-0 rounded-full animate-spin"
+                    style={{
+                      background: 'linear-gradient(45deg, #ff0066, #ff6600, #ffcc00, #66ff00, #0066ff, #6600ff)',
+                      padding: '4px',
+                      width: '94px',
+                      height: '94px',
+                      left: '-4px',
+                      top: '-4px',
+                      zIndex: 1
+                    }}
+                  />
+                )}
+                <Avatar 
+                  className={`border-2 ${shouldShowBorder ? 'border-transparent relative z-10' : 'border-slate-600'}`} 
+                  style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px'}}
+                >
+                  <AvatarImage src={story.url} alt={story.userName} />
+                  <AvatarFallback className="bg-slate-600" style={{fontSize: '18px'}}>
+                    {story.userName.substring(0, 1)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <span className="text-xs text-gray-300 truncate w-full">
+                {isOwnStory ? 'Ma Story' : story.userName}
+              </span>
+            </div>
+          );
+        })}
       </div>
-      <span className="text-xs text-gray-300 truncate w-full">{isOwnStory ? 'Ma Story' : story.userName}</span>
-    </Link>
+    </div>
   );
 };
 
@@ -114,22 +145,34 @@ const ChatPage = () => {
 
   useEffect(() => {
     if (currentUser && allStoriesFromContext) {
-      // Utiliser toutes les stories du contexte, pas seulement celles des chats
+      const chatUserIds = new Set(chatList.map(chat => chat.id));
       const currentUserStory = allStoriesFromContext.find(s => s.userId === currentUser.id && s.userName === "Moi");
-      const otherStories = allStoriesFromContext.filter(story => story.userId !== currentUser.id);
       
-      // Séparer les stories vues et non vues, puis les trier
-      const unseenStories = otherStories.filter(story => !story.seen);
-      const seenStories = otherStories.filter(story => story.seen);
+      // Ajouter des stories de test des chats
+      const testStoriesFromChats = chatList.slice(0, 3).map((chat, index) => ({
+        id: `story-${chat.id}`,
+        userId: chat.id,
+        userName: chat.name,
+        url: chat.avatarImage || `https://source.unsplash.com/random/100x100?person&sig=${chat.id}`,
+        seen: index === 0, // Première vue, autres non vues
+        timestamp: Date.now() - (index * 1000000)
+      }));
+      
+      const storiesFromChats = allStoriesFromContext.filter(story => 
+        chatUserIds.has(story.userId) && story.userId !== currentUser.id
+      );
+      
+      // Combiner stories réelles + stories de test  
+      const allChatStories = [...storiesFromChats, ...testStoriesFromChats];
+      const uniqueStoriesFromChats = Array.from(new Map(allChatStories.map(story => [story.userId, story])).values());
       
       const sortedStories = [
         ...(currentUserStory ? [{ ...currentUserStory, isOwnStory: true }] : []),
-        ...unseenStories, // Stories non vues en premier
-        ...seenStories   // Stories vues en dernier
+        ...uniqueStoriesFromChats.sort((a, b) => (a.seen === b.seen) ? 0 : a.seen ? 1 : -1)
       ];
       setDisplayableStories(sortedStories);
     }
-  }, [currentUser, allStoriesFromContext]);
+  }, [currentUser, allStoriesFromContext, chatList]);
 
   const openStoryViewer = (storyIndex) => {
     setCurrentStoryIndex(storyIndex);
@@ -164,20 +207,11 @@ const ChatPage = () => {
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
       <div className="flex-shrink-0 p-4 pb-0">
-        <div className="mb-3">
-          <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories</h2>
-          <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
-            <StoryBubble isAddButton={true} />
-            {(displayableStories || []).map((story, index) => (
-              <div key={story.id} onClick={() => openStoryViewer(index)}>
-                <StoryBubble
-                  story={story}
-                  isOwnStory={story.isOwnStory || (currentUser && story.userId === currentUser.id)}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <StoriesSection 
+          stories={displayableStories}
+          currentUser={currentUser}
+          onStoryClick={openStoryViewer}
+        />
 
         <div className="relative mb-5">
           <Input
@@ -203,30 +237,46 @@ const ChatPage = () => {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-white">
             Messages ({sortedChats.length})
-          </h2>
+          </h2>ge>
           {totalUnreadMessages > 0 && (
             <Badge variant="destructive" className="bg-pink-500 text-white">
               {totalUnreadMessages} non lu{totalUnreadMessages > 1 ? 's' : ''}
-            </Badge>
+            </Badge> 0 ? (
           )}
         </div>
+.id} chat={chat} index={index} />
+        {sortedChats.length === 0 && (
+          <div className="text-center py-10">
+            <h3 className="text-sm font-semibold text-gray-300 mb-2">
+              Aucune conversation trouvéelassName="flex flex-col items-center justify-center text-center text-gray-400 pt-10">
+            </h3>  <MessageSquare size={64} className="mb-4 opacity-50 text-pink-500/70" />
+            <p className="text-sm"><h2 className="text-xl font-semibold text-white mb-2">
+              {searchTerm ? "Essayez un autre terme de recherche." : "Commencez une conversation avec vos matchs !"}    {searchTerm ? `Aucune conversation trouvée pour "${searchTerm}"` : "Aucune conversation"}
+            </p>        </h2>
+            {!searchTerm && (          <p className="text-sm">
+              <Link to="/matches" className="mt-4">              {searchTerm ? "Essayez un autre terme de recherche." : "Commencez une conversation avec vos matchs !"}
+                <Button variant="outline" className="border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white">
 
-        {sortedChats.length > 0 ? (
-          <div className="space-y-3 pb-4">
-            {sortedChats.map((chat, index) => (
-              <ChatCard key={chat.id} chat={chat} index={index} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center text-center text-gray-400 pt-10">
-            <MessageSquare size={64} className="mb-4 opacity-50 text-pink-500/70" />
-            <h2 className="text-xl font-semibold text-white mb-2">
-              {searchTerm ? `Aucune conversation trouvée pour "${searchTerm}"` : "Aucune conversation"}
-            </h2>
-            <p className="text-sm">
-              {searchTerm ? "Essayez un autre terme de recherche." : "Commencez une conversation avec vos matchs !"}
-            </p>
-            {!searchTerm && (
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export default ChatPage;};  );    </div>      </div>        )}          </div>            ))}              <ChatCard key={chat.id} chat={chat} index={index} />            {sortedChats.map((chat, index) => (          <div className="space-y-4">        {sortedChats.length > 0 && (        )}          </div>            )}              </Link>                </Button>                  Voir mes matchs            {!searchTerm && (
               <Link to="/matches" className="mt-4">
                 <Button variant="outline" className="border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white">
                   Voir mes matchs
@@ -236,20 +286,6 @@ const ChatPage = () => {
           </div>
         )}
       </div>
-
-      <style jsx global>{`
-        .story-gradient-ring {
-          background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
-          background-size: 300% 300%;
-          animation: story-gradient-animation 3s ease infinite;
-        }
-        
-        @keyframes story-gradient-animation {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-      `}</style>
     </div>
   );
 };
