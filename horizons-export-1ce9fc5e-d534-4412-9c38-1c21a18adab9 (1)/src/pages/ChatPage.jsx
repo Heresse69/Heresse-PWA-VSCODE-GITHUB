@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MessageSquare, Search, PlusCircle } from 'lucide-react';
+import { MessageSquare, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,72 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useUser } from '@/contexts/UserContext'; 
 import { mockMatchesData as initialChatData } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
-
-// Composant Stories avec contours colorés intégré directement
-const StoriesSection = ({ stories, currentUser, onStoryClick }) => {
-  console.log('🎯 StoriesSection rendu avec', stories.length, 'stories:', stories);
-  
-  return (
-    <div className="mb-3">
-      <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories ({stories.length})</h2>
-      <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
-        {/* Bouton Ajouter - taille réduite de 5% */}
-        <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '85px', minWidth: '85px'}}>
-          <Button variant="outline" className="rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center" style={{width: '82px', height: '82px', minWidth: '82px', minHeight: '82px', borderWidth: '2px'}}>
-            <PlusCircle size={30} />
-          </Button>
-          <span className="text-xs text-gray-300">Ajouter</span>
-        </Link>
-        
-        {/* Stories avec contours pour les non vues */}
-        {stories.map((story, index) => {
-          const isOwnStory = story.isOwnStory || (currentUser && story.userId === currentUser.id);
-          const shouldShowBorder = !story.seen && !isOwnStory; // Contour seulement pour stories non vues
-          
-          console.log(`Story ${story.userName}: isOwnStory=${isOwnStory}, seen=${story.seen}, shouldShowBorder=${shouldShowBorder}`);
-          
-          return (
-            <div 
-              key={story.id}
-              className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center cursor-pointer" 
-              style={{width: '85px', minWidth: '85px'}}
-              onClick={() => onStoryClick(index)}
-            >
-              <div className="relative">
-                {shouldShowBorder && (
-                  <div 
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      background: 'linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%)',
-                      padding: '2px',
-                      width: '86px',
-                      height: '86px',
-                      left: '-2px',
-                      top: '-2px',
-                      zIndex: 1
-                    }}
-                  />
-                )}
-                <Avatar 
-                  className={`border-2 ${shouldShowBorder ? 'border-transparent relative z-10' : 'border-slate-600'}`} 
-                  style={{width: '82px', height: '82px', minWidth: '82px', minHeight: '82px'}}
-                >
-                  <AvatarImage src={story.url} alt={story.userName} />
-                  <AvatarFallback className="bg-slate-600" style={{fontSize: '17px'}}>
-                    {story.userName.substring(0, 1)}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              <span className="text-xs text-gray-300 truncate w-full">
-                {isOwnStory ? 'Ma Story' : story.userName}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+import StoriesSection from '@/components/StoriesSection';
 
 const ChatCard = ({ chat, index }) => {
   const formatTimestamp = (timestamp) => {
@@ -136,47 +71,26 @@ const ChatCard = ({ chat, index }) => {
 };
 
 const ChatPage = () => {
-  const { currentUser, stories: allStoriesFromContext } = useUser();
+  const { currentUser } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [chatList, setChatList] = useState(initialChatData);
-  const [displayableStories, setDisplayableStories] = useState([]);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+  const [availableStories, setAvailableStories] = useState([]);
 
-  useEffect(() => {
-    if (currentUser && allStoriesFromContext) {
-      const chatUserIds = new Set(chatList.map(chat => chat.id));
-      const currentUserStory = allStoriesFromContext.find(s => s.userId === currentUser.id && s.userName === "Moi");
-      
-      // Ajouter des stories de test des chats
-      const testStoriesFromChats = chatList.slice(0, 3).map((chat, index) => ({
-        id: `story-${chat.id}`,
-        userId: chat.id,
-        userName: chat.name,
-        url: chat.avatarImage || `https://source.unsplash.com/random/100x100?person&sig=${chat.id}`,
-        seen: index === 0, // Première vue, autres non vues
-        timestamp: Date.now() - (index * 1000000)
-      }));
-      
-      const storiesFromChats = allStoriesFromContext.filter(story => 
-        chatUserIds.has(story.userId) && story.userId !== currentUser.id
-      );
-      
-      // Combiner stories réelles + stories de test  
-      const allChatStories = [...storiesFromChats, ...testStoriesFromChats];
-      const uniqueStoriesFromChats = Array.from(new Map(allChatStories.map(story => [story.userId, story])).values());
-      
-      const sortedStories = [
-        ...(currentUserStory ? [{ ...currentUserStory, isOwnStory: true }] : []),
-        ...uniqueStoriesFromChats.sort((a, b) => (a.seen === b.seen) ? 0 : a.seen ? 1 : -1)
-      ];
-      setDisplayableStories(sortedStories);
-    }
-  }, [currentUser, allStoriesFromContext, chatList]);
+  const handleStoriesReady = (stories) => {
+    console.log('📚 Stories prêtes dans ChatPage:', stories.length);
+    setAvailableStories(stories);
+  };
 
   const openStoryViewer = (storyIndex) => {
-    setCurrentStoryIndex(storyIndex);
-    setIsStoryViewerOpen(true);
+    console.log('🎯 Tentative d\'ouverture story index:', storyIndex, 'Stories disponibles:', availableStories.length);
+    if (availableStories.length > 0) {
+      setCurrentStoryIndex(storyIndex);
+      setIsStoryViewerOpen(true);
+    } else {
+      console.warn('Aucune story disponible pour le viewer');
+    }
   };
 
   const closeStoryViewer = () => {
@@ -208,9 +122,11 @@ const ChatPage = () => {
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
       <div className="flex-shrink-0 p-4 pb-0">
         <StoriesSection 
-          stories={displayableStories}
+          usersList={chatList}
           currentUser={currentUser}
           onStoryClick={openStoryViewer}
+          onStoriesReady={handleStoriesReady}
+          showDebug={true}
         />
 
         <div className="relative mb-5">
@@ -225,9 +141,9 @@ const ChatPage = () => {
         </div>
       </div>
 
-      {isStoryViewerOpen && (
+      {isStoryViewerOpen && availableStories.length > 0 && (
         <StoryViewer
-          stories={displayableStories}
+          stories={availableStories}
           initialIndex={currentStoryIndex}
           onClose={closeStoryViewer}
         />

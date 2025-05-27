@@ -1,77 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, MessageSquare, Search, PlusCircle } from 'lucide-react';
+import { Heart, MessageSquare, Search, Filter, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
 import { useUser } from '@/contexts/UserContext'; 
 import { mockMatchesData as initialMockMatchedProfiles } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
+import StoriesSection from '@/components/StoriesSection';
 
-// Composant Stories avec contours colorés intégré directement
-const StoriesSection = ({ stories, currentUser, onStoryClick }) => {
-  return (
-    <div className="mb-3">
-      <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories</h2>
-      <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
-        {/* Bouton Ajouter - taille réduite de 5% */}
-        <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '85px', minWidth: '85px'}}>
-          <Button variant="outline" className="rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center" style={{width: '82px', height: '82px', minWidth: '82px', minHeight: '82px', borderWidth: '2px'}}>
-            <PlusCircle size={30} />
-          </Button>
-          <span className="text-xs text-gray-300">Ajouter</span>
-        </Link>
-        
-        {/* Stories avec contours pour les non vues */}
-        {stories.map((story, index) => {
-          const isOwnStory = story.isOwnStory || (currentUser && story.userId === currentUser.id);
-          const shouldShowBorder = !story.seen && !isOwnStory; // Contour seulement pour stories non vues
-          
-          return (
-            <div 
-              key={story.id}
-              className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center cursor-pointer" 
-              style={{width: '85px', minWidth: '85px'}}
-              onClick={() => onStoryClick(index)}
-            >
-              <div className="relative">
-                {shouldShowBorder && (
-                  <div 
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      background: 'linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%)',
-                      padding: '2px',
-                      width: '86px',
-                      height: '86px',
-                      left: '-2px',
-                      top: '-2px',
-                      zIndex: 1
-                    }}
-                  />
-                )}
-                <Avatar 
-                  className={`border-2 ${shouldShowBorder ? 'border-transparent relative z-10' : 'border-slate-600'}`} 
-                  style={{width: '82px', height: '82px', minWidth: '82px', minHeight: '82px'}}
-                >
-                  <AvatarImage src={story.url} alt={story.userName} />
-                  <AvatarFallback className="bg-slate-600" style={{fontSize: '17px'}}>
-                    {story.userName.substring(0, 1)}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              <span className="text-xs text-gray-300 truncate w-full">
-                {isOwnStory ? 'Ma Story' : story.userName}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
+// Composant MatchCard pour afficher chaque profil de match
 const MatchCard = ({ profile, index }) => {
   return (
     <motion.div
@@ -113,81 +56,115 @@ const MatchCard = ({ profile, index }) => {
 };
 
 const MatchesPage = () => {
-  const { currentUser, stories: allStoriesFromContext } = useUser();
+  const { currentUser } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [matchedProfilesList, setMatchedProfilesList] = useState(
     initialMockMatchedProfiles.map(profile => ({
       ...profile,
       age: Math.floor(Math.random() * 10) + 20, 
-      commonInterests: Math.floor(Math.random() * 5) 
+      commonInterests: Math.floor(Math.random() * 5),
+      mediaRating: Math.floor(Math.random() * 5) + 1 // Note de 1 à 5 étoiles
     }))
   );
-  const [displayableStories, setDisplayableStories] = useState([]);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+  const [availableStories, setAvailableStories] = useState([]);
+  
+  // États pour les filtres
+  const [filters, setFilters] = useState({
+    onlineStatus: 'all', // 'all', 'online', 'offline'
+    ageRange: 'all', // 'all', '18-25', '26-30', '31-35', '36+'
+    mediaRating: 'all' // 'all', '1', '2', '3', '4', '5'
+  });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  useEffect(() => {
-    if (currentUser && allStoriesFromContext) {
-      console.log('MatchesPage - Stories from context:', allStoriesFromContext);
-      const matchUserIds = new Set(matchedProfilesList.map(match => match.id));
-      const currentUserStory = allStoriesFromContext.find(s => s.userId === currentUser.id && s.userName === "Moi");
-      
-      // Ajouter des stories de test des matchs
-      const testStoriesFromMatches = matchedProfilesList.slice(0, 4).map((match, index) => ({
-        id: `story-${match.id}`,
-        userId: match.id,
-        userName: match.name,
-        url: match.avatarImage || `https://source.unsplash.com/random/100x100?person&sig=${match.id}`,
-        seen: index % 2 === 0, // Alterner vues/non vues
-        timestamp: Date.now() - (index * 1000000)
-      }));
-      
-      const storiesFromMatches = allStoriesFromContext.filter(story => 
-        matchUserIds.has(story.userId) && story.userId !== currentUser.id
-      );
-      
-      // Combiner stories réelles + stories de test
-      const allMatchStories = [...storiesFromMatches, ...testStoriesFromMatches];
-      const uniqueStoriesFromMatches = Array.from(new Map(allMatchStories.map(story => [story.userId, story])).values());
-      
-      const sortedStories = [
-        ...(currentUserStory ? [{ ...currentUserStory, isOwnStory: true }] : []),
-        ...uniqueStoriesFromMatches.sort((a, b) => (a.seen === b.seen) ? 0 : a.seen ? 1 : -1)
-      ];
-      console.log('MatchesPage - Final stories:', sortedStories);
-      setDisplayableStories(sortedStories);
-    }
-  }, [currentUser, allStoriesFromContext, matchedProfilesList]);
+  const handleStoriesReady = (stories) => {
+    console.log('📚 Stories prêtes dans MatchesPage:', stories.length);
+    setAvailableStories(stories);
+  };
 
   const openStoryViewer = (storyIndex) => {
-    setCurrentStoryIndex(storyIndex);
-    setIsStoryViewerOpen(true);
+    console.log('🎯 Ouverture story index:', storyIndex, 'Stories disponibles:', availableStories.length);
+    if (availableStories.length > 0) {
+      setCurrentStoryIndex(storyIndex);
+      setIsStoryViewerOpen(true);
+    } else {
+      console.warn('Aucune story disponible pour le viewer');
+    }
   };
 
   const closeStoryViewer = () => {
     setIsStoryViewerOpen(false);
   };
 
-  const filteredProfiles = matchedProfilesList.filter(profile =>
-    profile.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProfiles = matchedProfilesList.filter(profile => {
+    // Filtre par nom
+    const matchesSearch = profile.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtre par statut en ligne
+    const matchesOnlineStatus = filters.onlineStatus === 'all' || 
+      (filters.onlineStatus === 'online' && profile.online) ||
+      (filters.onlineStatus === 'offline' && !profile.online);
+    
+    // Filtre par âge
+    let matchesAge = true;
+    if (filters.ageRange !== 'all') {
+      const age = profile.age;
+      switch (filters.ageRange) {
+        case '18-25':
+          matchesAge = age >= 18 && age <= 25;
+          break;
+        case '26-30':
+          matchesAge = age >= 26 && age <= 30;
+          break;
+        case '31-35':
+          matchesAge = age >= 31 && age <= 35;
+          break;
+        case '36+':
+          matchesAge = age >= 36;
+          break;
+      }
+    }
+    
+    // Filtre par note des médias
+    const matchesMediaRating = filters.mediaRating === 'all' || 
+      profile.mediaRating >= parseInt(filters.mediaRating);
+    
+    return matchesSearch && matchesOnlineStatus && matchesAge && matchesMediaRating;
+  });
 
   const sortedProfiles = filteredProfiles.sort((a, b) => {
     // Sort by online status first
     if (a.online && !b.online) return -1;
     if (!a.online && b.online) return 1;
     
+    // Then by media rating
+    if (b.mediaRating !== a.mediaRating) return b.mediaRating - a.mediaRating;
+    
     // Then by common interests
     return b.commonInterests - a.commonInterests;
   });
+
+  const resetFilters = () => {
+    setFilters({
+      onlineStatus: 'all',
+      ageRange: 'all',
+      mediaRating: 'all'
+    });
+  };
+
+  const hasActiveFilters = filters.onlineStatus !== 'all' || 
+                          filters.ageRange !== 'all' || 
+                          filters.mediaRating !== 'all';
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
       <div className="flex-shrink-0 p-4 pb-0">
         <StoriesSection 
-          stories={displayableStories}
+          usersList={matchedProfilesList}
           currentUser={currentUser}
           onStoryClick={openStoryViewer}
+          onStoriesReady={handleStoriesReady}
         />
 
         <div className="relative mb-5">
@@ -202,20 +179,124 @@ const MatchesPage = () => {
         </div>
       </div>
 
-      {isStoryViewerOpen && (
+      {isStoryViewerOpen && availableStories.length > 0 && (
         <StoryViewer
-          stories={displayableStories}
+          stories={availableStories}
           initialIndex={currentStoryIndex}
           onClose={closeStoryViewer}
         />
       )}
 
       <div className="flex-1 overflow-y-auto px-4 pb-20">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">
-            Matchs ({sortedProfiles.length})
+            Vos matchs ({sortedProfiles.length})
           </h2>
+          
+          {/* Pastille Filtrer - exactement comme celle des messages non lus */}
+          <Badge 
+            variant="destructive" 
+            className="bg-pink-500 text-white cursor-pointer hover:bg-pink-600 transition-colors"
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+          >
+            <Filter size={12} className="mr-1" />
+            Filtrer
+            {hasActiveFilters && <span className="ml-1">•</span>}
+          </Badge>
         </div>
+
+        {/* Panneau de filtres qui s'affiche en dessous */}
+        {isFilterOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-4 p-4 bg-slate-800 rounded-xl border border-slate-700"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-white">Filtrer vos matchs</h3>
+              {hasActiveFilters && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={resetFilters}
+                  className="text-pink-400 hover:text-pink-300 text-xs"
+                >
+                  <X size={12} className="mr-1" />
+                  Tout effacer
+                </Button>
+              )}
+            </div>
+            
+            <div className="space-y-4">
+              {/* Filtre statut en ligne */}
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-2 block">
+                  Statut de connexion
+                </label>
+                <Select value={filters.onlineStatus} onValueChange={(value) => setFilters({...filters, onlineStatus: value})}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-700 border-slate-600">
+                    <SelectItem value="all" className="text-white hover:bg-slate-600">Tous les statuts</SelectItem>
+                    <SelectItem value="online" className="text-white hover:bg-slate-600">🟢 En ligne uniquement</SelectItem>
+                    <SelectItem value="offline" className="text-white hover:bg-slate-600">⚫ Hors ligne uniquement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Separator className="bg-slate-600" />
+
+              {/* Filtre âge */}
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-2 block">
+                  Tranche d'âge
+                </label>
+                <Select value={filters.ageRange} onValueChange={(value) => setFilters({...filters, ageRange: value})}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-700 border-slate-600">
+                    <SelectItem value="all" className="text-white hover:bg-slate-600">Tous les âges</SelectItem>
+                    <SelectItem value="18-25" className="text-white hover:bg-slate-600">18-25 ans</SelectItem>
+                    <SelectItem value="26-30" className="text-white hover:bg-slate-600">26-30 ans</SelectItem>
+                    <SelectItem value="31-35" className="text-white hover:bg-slate-600">31-35 ans</SelectItem>
+                    <SelectItem value="36+" className="text-white hover:bg-slate-600">36 ans et plus</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Separator className="bg-slate-600" />
+
+              {/* Filtre note des médias */}
+              <div>
+                <label className="text-sm font-medium text-gray-300 mb-2 block">
+                  Note minimale des médias
+                </label>
+                <Select value={filters.mediaRating} onValueChange={(value) => setFilters({...filters, mediaRating: value})}>
+                  <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-700 border-slate-600">
+                    <SelectItem value="all" className="text-white hover:bg-slate-600">Toutes les notes</SelectItem>
+                    <SelectItem value="5" className="text-white hover:bg-slate-600">⭐⭐⭐⭐⭐ Excellente (5/5)</SelectItem>
+                    <SelectItem value="4" className="text-white hover:bg-slate-600">⭐⭐⭐⭐ Très bonne (4/5+)</SelectItem>
+                    <SelectItem value="3" className="text-white hover:bg-slate-600">⭐⭐⭐ Bonne (3/5+)</SelectItem>
+                    <SelectItem value="2" className="text-white hover:bg-slate-600">⭐⭐ Moyenne (2/5+)</SelectItem>
+                    <SelectItem value="1" className="text-white hover:bg-slate-600">⭐ Toutes notes (1/5+)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-slate-600">
+              <p className="text-xs text-gray-400">
+                {filteredProfiles.length} match{filteredProfiles.length > 1 ? 's' : ''} trouvé{filteredProfiles.length > 1 ? 's' : ''}
+              </p>
+            </div>
+          </motion.div>
+        )}
 
         {sortedProfiles.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pb-4">
@@ -227,11 +308,21 @@ const MatchesPage = () => {
           <div className="flex flex-col items-center justify-center text-center text-gray-400 pt-10">
             <Heart size={64} className="mb-4 opacity-50 text-pink-500/70" />
             <h2 className="text-xl font-semibold text-white mb-2">
-              {searchTerm ? `Aucun match trouvé pour "${searchTerm}"` : "Aucun match pour le moment"}
+              {searchTerm || hasActiveFilters ? "Aucun match trouvé" : "Aucun match pour le moment"}
             </h2>
             <p className="text-sm">
-              {searchTerm ? "Essayez un autre terme de recherche." : "Continuez à swiper pour trouver des matchs !"}
+              {searchTerm || hasActiveFilters ? "Essayez de modifier vos critères de recherche." : "Continuez à swiper pour trouver des matchs !"}
             </p>
+            {hasActiveFilters && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={resetFilters}
+                className="mt-3 border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white"
+              >
+                Effacer les filtres
+              </Button>
+            )}
           </div>
         )}
       </div>
