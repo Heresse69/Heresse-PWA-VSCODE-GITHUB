@@ -18,10 +18,10 @@ const StoriesSection = ({ stories, currentUser, onStoryClick }) => {
     <div className="mb-3">
       <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories ({stories.length})</h2>
       <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
-        {/* Bouton Ajouter */}
-        <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '90px', minWidth: '90px'}}>
-          <Button variant="outline" className="rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center" style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px', borderWidth: '2px'}}>
-            <PlusCircle size={32} />
+        {/* Bouton Ajouter - taille réduite de 5% */}
+        <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '85px', minWidth: '85px'}}>
+          <Button variant="outline" className="rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center" style={{width: '82px', height: '82px', minWidth: '82px', minHeight: '82px', borderWidth: '2px'}}>
+            <PlusCircle size={30} />
           </Button>
           <span className="text-xs text-gray-300">Ajouter</span>
         </Link>
@@ -37,30 +37,30 @@ const StoriesSection = ({ stories, currentUser, onStoryClick }) => {
             <div 
               key={story.id}
               className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center cursor-pointer" 
-              style={{width: '90px', minWidth: '90px'}}
+              style={{width: '85px', minWidth: '85px'}}
               onClick={() => onStoryClick(index)}
             >
               <div className="relative">
                 {shouldShowBorder && (
                   <div 
-                    className="absolute inset-0 rounded-full animate-spin"
+                    className="absolute inset-0 rounded-full"
                     style={{
-                      background: 'linear-gradient(45deg, #ff0066, #ff6600, #ffcc00, #66ff00, #0066ff, #6600ff)',
-                      padding: '4px',
-                      width: '94px',
-                      height: '94px',
-                      left: '-4px',
-                      top: '-4px',
+                      background: 'linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%)',
+                      padding: '2px',
+                      width: '86px',
+                      height: '86px',
+                      left: '-2px',
+                      top: '-2px',
                       zIndex: 1
                     }}
                   />
                 )}
                 <Avatar 
                   className={`border-2 ${shouldShowBorder ? 'border-transparent relative z-10' : 'border-slate-600'}`} 
-                  style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px'}}
+                  style={{width: '82px', height: '82px', minWidth: '82px', minHeight: '82px'}}
                 >
                   <AvatarImage src={story.url} alt={story.userName} />
-                  <AvatarFallback className="bg-slate-600" style={{fontSize: '18px'}}>
+                  <AvatarFallback className="bg-slate-600" style={{fontSize: '17px'}}>
                     {story.userName.substring(0, 1)}
                   </AvatarFallback>
                 </Avatar>
@@ -237,46 +237,30 @@ const ChatPage = () => {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-white">
             Messages ({sortedChats.length})
-          </h2>ge>
+          </h2>
           {totalUnreadMessages > 0 && (
             <Badge variant="destructive" className="bg-pink-500 text-white">
               {totalUnreadMessages} non lu{totalUnreadMessages > 1 ? 's' : ''}
-            </Badge> 0 ? (
+            </Badge>
           )}
         </div>
-.id} chat={chat} index={index} />
-        {sortedChats.length === 0 && (
-          <div className="text-center py-10">
-            <h3 className="text-sm font-semibold text-gray-300 mb-2">
-              Aucune conversation trouvéelassName="flex flex-col items-center justify-center text-center text-gray-400 pt-10">
-            </h3>  <MessageSquare size={64} className="mb-4 opacity-50 text-pink-500/70" />
-            <p className="text-sm"><h2 className="text-xl font-semibold text-white mb-2">
-              {searchTerm ? "Essayez un autre terme de recherche." : "Commencez une conversation avec vos matchs !"}    {searchTerm ? `Aucune conversation trouvée pour "${searchTerm}"` : "Aucune conversation"}
-            </p>        </h2>
-            {!searchTerm && (          <p className="text-sm">
-              <Link to="/matches" className="mt-4">              {searchTerm ? "Essayez un autre terme de recherche." : "Commencez une conversation avec vos matchs !"}
-                <Button variant="outline" className="border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white">
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export default ChatPage;};  );    </div>      </div>        )}          </div>            ))}              <ChatCard key={chat.id} chat={chat} index={index} />            {sortedChats.map((chat, index) => (          <div className="space-y-4">        {sortedChats.length > 0 && (        )}          </div>            )}              </Link>                </Button>                  Voir mes matchs            {!searchTerm && (
+        {sortedChats.length > 0 ? (
+          <div className="space-y-3 pb-4">
+            {sortedChats.map((chat, index) => (
+              <ChatCard key={chat.id} chat={chat} index={index} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center text-gray-400 pt-10">
+            <MessageSquare size={64} className="mb-4 opacity-50 text-pink-500/70" />
+            <h2 className="text-xl font-semibold text-white mb-2">
+              {searchTerm ? `Aucune conversation trouvée pour "${searchTerm}"` : "Aucune conversation"}
+            </h2>
+            <p className="text-sm">
+              {searchTerm ? "Essayez un autre terme de recherche." : "Commencez une conversation avec vos matchs !"}
+            </p>
+            {!searchTerm && (
               <Link to="/matches" className="mt-4">
                 <Button variant="outline" className="border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white">
                   Voir mes matchs

@@ -16,10 +16,10 @@ const StoriesSection = ({ stories, currentUser, onStoryClick }) => {
     <div className="mb-3">
       <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories</h2>
       <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
-        {/* Bouton Ajouter */}
-        <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '90px', minWidth: '90px'}}>
-          <Button variant="outline" className="rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center" style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px', borderWidth: '2px'}}>
-            <PlusCircle size={32} />
+        {/* Bouton Ajouter - taille réduite de 5% */}
+        <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '85px', minWidth: '85px'}}>
+          <Button variant="outline" className="rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center" style={{width: '82px', height: '82px', minWidth: '82px', minHeight: '82px', borderWidth: '2px'}}>
+            <PlusCircle size={30} />
           </Button>
           <span className="text-xs text-gray-300">Ajouter</span>
         </Link>
@@ -33,30 +33,30 @@ const StoriesSection = ({ stories, currentUser, onStoryClick }) => {
             <div 
               key={story.id}
               className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center cursor-pointer" 
-              style={{width: '90px', minWidth: '90px'}}
+              style={{width: '85px', minWidth: '85px'}}
               onClick={() => onStoryClick(index)}
             >
               <div className="relative">
                 {shouldShowBorder && (
                   <div 
-                    className="absolute inset-0 rounded-full animate-spin"
+                    className="absolute inset-0 rounded-full"
                     style={{
-                      background: 'linear-gradient(45deg, #ff0066, #ff6600, #ffcc00, #66ff00, #0066ff, #6600ff)',
-                      padding: '4px',
-                      width: '94px',
-                      height: '94px',
-                      left: '-4px',
-                      top: '-4px',
+                      background: 'linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #F77737 100%)',
+                      padding: '2px',
+                      width: '86px',
+                      height: '86px',
+                      left: '-2px',
+                      top: '-2px',
                       zIndex: 1
                     }}
                   />
                 )}
                 <Avatar 
                   className={`border-2 ${shouldShowBorder ? 'border-transparent relative z-10' : 'border-slate-600'}`} 
-                  style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px'}}
+                  style={{width: '82px', height: '82px', minWidth: '82px', minHeight: '82px'}}
                 >
                   <AvatarImage src={story.url} alt={story.userName} />
-                  <AvatarFallback className="bg-slate-600" style={{fontSize: '18px'}}>
+                  <AvatarFallback className="bg-slate-600" style={{fontSize: '17px'}}>
                     {story.userName.substring(0, 1)}
                   </AvatarFallback>
                 </Avatar>
