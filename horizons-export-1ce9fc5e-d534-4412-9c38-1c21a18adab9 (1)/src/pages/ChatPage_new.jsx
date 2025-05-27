@@ -25,9 +25,9 @@ import { useCallback } from 'react';
 const StoryBubble = ({ story, isOwnStory, isAddButton }) => {
   if (isAddButton) {
     return (
-      <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center w-24">
-        <Button variant="outline" className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center">
-          <PlusCircle size={32} />
+      <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '140px !important', minWidth: '140px'}}>
+        <Button variant="outline" className="rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center" style={{width: '120px !important', height: '120px !important', minWidth: '120px', minHeight: '120px'}}>
+          <PlusCircle size={50} />
         </Button>
         <span className="text-xs text-gray-300">Ajouter</span>
       </Link>
@@ -35,10 +35,10 @@ const StoryBubble = ({ story, isOwnStory, isAddButton }) => {
   }
 
   return (
-    <Link to={`/stories/${story.id}`} className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center w-24">
-      <Avatar className={`w-20 h-20 sm:w-24 sm:h-24 border-2 ${!story.seen && !isOwnStory ? 'border-pink-500' : 'border-slate-600'}`}>
+    <Link to={`/stories/${story.id}`} className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '140px !important', minWidth: '140px'}}>
+      <Avatar className={`border-4 ${!story.seen && !isOwnStory ? 'border-pink-500' : 'border-red-500'}`} style={{width: '120px !important', height: '120px !important', minWidth: '120px', minHeight: '120px', borderWidth: '4px !important'}}>
         <AvatarImage src={story.url} alt={story.userName} />
-        <AvatarFallback className="bg-slate-600 text-lg">{story.userName.substring(0, 1)}</AvatarFallback>
+        <AvatarFallback className="bg-slate-600" style={{fontSize: '24px !important'}}>{story.userName.substring(0, 1)}</AvatarFallback>
       </Avatar>
       <span className="text-xs text-gray-300 truncate w-full">{isOwnStory ? 'Ma Story' : story.userName}</span>
     </Link>
@@ -383,11 +383,11 @@ const ChatPage = () => {
 
   // Sinon, afficher la liste des conversations (exactement comme MatchesPage)
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
+    <div className="h-screen w-full flex flex-col bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden fixed inset-0">
       {/* Section fixe en haut - Stories */}
-      <div className="flex-shrink-0 p-4 pb-2">
-        <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories</h2>
-        <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+      <div className="flex-shrink-0 h-[140px] p-3 pb-2 overflow-hidden">
+        <h2 className="text-sm font-semibold text-gray-400 mb-2 px-1">Stories</h2>
+        <div className="flex space-x-3 overflow-x-auto overflow-y-hidden pb-2 -mx-3 px-3 no-scrollbar h-[96px] items-start">
           <StoryBubble isAddButton={true} />
           {(displayableStories || []).map((story, index) => (
             <div key={story.id} onClick={() => openStoryViewer(index)}>
@@ -401,48 +401,50 @@ const ChatPage = () => {
       </div>
 
       {/* Section fixe - Barre de recherche */}
-      <div className="flex-shrink-0 px-4 pb-4">
-        <div className="relative">
+      <div className="flex-shrink-0 h-[64px] px-3 pb-3 overflow-hidden">
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
           <Input
             type="text"
             placeholder="Rechercher une conversation..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-pink-500 focus:border-pink-500 pl-10 rounded-full py-2.5"
+            className="bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-pink-500 focus:border-pink-500 pl-10 pr-4 rounded-full py-2 w-full text-sm"
           />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
         </div>
-      </div>
-
-      {/* Section scrollable - Liste des conversations */}
-      <div className="flex-1 px-4 pb-20 overflow-y-auto">
-        {isStoryViewerOpen && (
-          <StoryViewer
-            stories={displayableStories}
-            initialIndex={currentStoryIndex}
-            onClose={closeStoryViewer}
-          />
-        )}
-        
-        <div>
-          <h2 className="text-lg font-semibold text-white mb-3">Vos Conversations ({filteredConversations.length})</h2>
-          {filteredConversations.length > 0 ? (
-            <div className="space-y-3">
-              {filteredConversations.map((conversation, index) => (
-                <ConversationCard key={conversation.id} conversation={conversation} index={index} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center text-center text-gray-400 pt-10">
-              <MessageSquare size={64} className="mb-4 opacity-50 text-pink-500/70" />
-              <h2 className="text-xl font-semibold text-white mb-2">
-                {searchTerm ? `Aucune conversation trouvée pour "${searchTerm}"` : "Aucune conversation pour le moment"}
-              </h2>
-              <p className="text-sm">
-                {searchTerm ? "Essayez un autre terme de recherche." : "Commencez à matcher pour démarrer des conversations !"}
-              </p>
-            </div>
+      </div>      {/* Section scrollable - Liste des conversations */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="h-full px-3 pb-20 overflow-y-auto overflow-x-hidden mobile-scroll prevent-bounce">
+          {isStoryViewerOpen && (
+            <StoryViewer
+              stories={displayableStories}
+              initialIndex={currentStoryIndex}
+              onClose={closeStoryViewer}
+            />
           )}
+        
+          <div className="w-full">
+            <h2 className="text-lg font-semibold text-white mb-3 sticky top-0 bg-gradient-to-b from-slate-900 to-transparent py-2">
+              Vos Conversations ({filteredConversations.length})
+            </h2>
+            {filteredConversations.length > 0 ? (
+              <div className="space-y-3 pb-4">
+                {filteredConversations.map((conversation, index) => (
+                  <ConversationCard key={conversation.id} conversation={conversation} index={index} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center text-gray-400 py-10 h-full">
+                <MessageSquare size={64} className="mb-4 opacity-50 text-pink-500/70" />
+                <h2 className="text-xl font-semibold text-white mb-2">
+                  {searchTerm ? `Aucune conversation trouvée pour "${searchTerm}"` : "Aucune conversation pour le moment"}
+                </h2>
+                <p className="text-sm px-4">
+                  {searchTerm ? "Essayez un autre terme de recherche." : "Commencez à matcher pour démarrer des conversations !"}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -212,12 +212,10 @@ import { initialMockProfilesData } from '@/data/mockProfiles';
 
       return (
         <div className="relative w-full h-screen flex flex-col bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
-          <HomePageHeader 
-            onOpenFilters={() => navigate('/settings')}
-          />
+          <HomePageHeader />
 
-          {/* Zone principale centrée pour la carte avec espace pour les boutons */}
-          <div className="flex-1 flex flex-col justify-center px-2 pt-2 min-h-0">
+          {/* Zone principale - carte collée au header */}
+          <div className="flex-1 flex flex-col px-2">
             <div className="w-full max-w-md aspect-[3/4] relative mx-auto flex-shrink-0">
               <AnimatePresence>
                 {currentProfile && (
@@ -243,9 +241,9 @@ import { initialMockProfilesData } from '@/data/mockProfiles';
               </AnimatePresence>
             </div>
             
-            {/* Boutons d'action ENTRE la carte et la navigation */}
+            {/* Boutons d'action collés à la carte */}
             {currentProfile && (
-              <div className="px-4 py-4 flex-shrink-0">
+              <div className="w-full max-w-md mx-auto px-4 py-2">
                 <ActionButtons
                     onRewind={handleRewind}
                     onSwipe={triggerSwipe}
