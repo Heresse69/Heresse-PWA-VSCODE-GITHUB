@@ -143,13 +143,14 @@ import React from 'react';
 
 
       return (
-        <div className="flex flex-col h-full bg-background text-foreground">
+        <div className="flex flex-col h-full bg-background text-foreground" style={{ overscrollBehavior: 'none', WebkitOverflowScrolling: 'auto' }}>
           {showHeader && (
             <header 
               className="p-2.5 flex items-center justify-between bg-background/80 backdrop-blur-sm z-20 border-b border-border fixed top-0 left-0 right-0 max-w-md mx-auto"
               style={{ 
                 paddingTop: `calc(0.625rem + env(safe-area-inset-top))`,
-                height: headerHeight 
+                height: headerHeight,
+                overscrollBehavior: 'none'
               }} 
             >
               <div className="flex items-center min-w-0">
@@ -197,13 +198,29 @@ import React from 'react';
 
           {showNav && (
             <nav 
-              className="bg-background/90 backdrop-blur-sm py-1 px-2 border-t border-border shadow-lg fixed bottom-0 left-0 right-0 max-w-md mx-auto flex items-center z-30"
+              className="bg-background/95 backdrop-blur-md py-1 px-4 border-t border-border shadow-2xl fixed bottom-0 left-0 right-0 max-w-md mx-auto flex items-center z-50"
               style={{ 
-                height: `calc(56px + env(safe-area-inset-bottom))`,
-                paddingBottom: `env(safe-area-inset-bottom)`
+                height: `calc(60px + env(safe-area-inset-bottom))`,
+                paddingBottom: `env(safe-area-inset-bottom)`,
+                position: 'fixed',
+                bottom: '0px',
+                left: '0px',
+                right: '0px',
+                transform: 'translate3d(0, 0, 0)',
+                WebkitTransform: 'translate3d(0, 0, 0)',
+                MozTransform: 'translate3d(0, 0, 0)',
+                msTransform: 'translate3d(0, 0, 0)',
+                willChange: 'auto',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                perspective: '1000px',
+                WebkitPerspective: '1000px',
+                zIndex: '9999',
+                overscrollBehavior: 'none',
+                WebkitOverflowScrolling: 'auto'
               }}
             >
-              <div className="flex justify-around items-center w-full h-[56px]">
+              <div className="flex justify-around items-center w-full h-[60px]">
                 <NavItem to="/" icon={Home} label="Découvrir" isActive={location.pathname === '/'} />
                 <NavItem to="/matches" icon={Heart} label="Matchs" isActive={location.pathname === '/matches'} notificationCount={currentUser?.newMatchesCount || 0} />
                 <NavItem to="/chat" icon={MessageSquare} label="Messages" isActive={isChatListPage || isChatPageActive} notificationCount={currentUser?.totalUnreadMessagesCount || 0} />
