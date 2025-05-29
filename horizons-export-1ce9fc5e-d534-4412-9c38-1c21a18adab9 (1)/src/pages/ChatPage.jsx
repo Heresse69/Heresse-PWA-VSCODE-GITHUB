@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useUser } from '@/contexts/UserContext'; 
-import { mockMatchesData as initialChatData } from '@/data/mockChatData'; 
+import { getConversations } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
 import StoriesSection from '@/components/StoriesSection';
 
@@ -73,7 +73,27 @@ const ChatCard = ({ chat, index }) => {
 const ChatPage = () => {
   const { currentUser } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
-  const [chatList, setChatList] = useState(initialChatData);
+  
+  // Utiliser les vraies conversations au lieu des données statiques
+  const [chatList, setChatList] = useState([]);
+  
+  // Mettre à jour la liste des conversations quand elles changent
+  useEffect(() => {
+    const conversations = getConversations();
+    const enrichedConversations = conversations.map(conv => ({
+      id: conv.id,
+      name: conv.participantName,
+      lastMessage: conv.lastMessage || "Nouvelle conversation",
+      timestamp: conv.lastMessageTime ? new Date(conv.lastMessageTime).toLocaleTimeString() : "Maintenant",
+      unread: conv.unreadCount || 0,
+      online: conv.online || Math.random() > 0.5,
+      avatarImage: conv.participantAvatar,
+      avatarText: conv.participantName ? conv.participantName.substring(0, 1).toUpperCase() : 'U',
+      availableMedia: []
+    }));
+    setChatList(enrichedConversations);
+  }, []);
+  
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [availableStories, setAvailableStories] = useState([]);

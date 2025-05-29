@@ -10,12 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { useUser } from '@/contexts/UserContext'; 
-import { mockMatchesData as initialMockMatchedProfiles } from '@/data/mockChatData'; 
+import { getMatches, getConversations } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
 import StoriesSection from '@/components/StoriesSection';
 
 // Composant MatchCard pour afficher chaque profil de match
-const MatchCard = ({ profile, index }) => {
+const MatchCard = ({ profile, index, conversationId }) => {
+  const chatLink = conversationId ? `/chat/${conversationId}` : `/matches/${profile.id}`;
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -39,15 +41,21 @@ const MatchCard = ({ profile, index }) => {
             {profile.commonInterests} centres d'intérêt en commun
           </p>
         )}
+        {conversationId && (
+          <p className="text-xs text-green-300 flex items-center mt-1">
+            <MessageSquare size={12} className="mr-1" />
+            Conversation active
+          </p>
+        )}
       </div>
-      <Link to={`/chat/${profile.id}`} className="absolute inset-0" aria-label={`Chatter avec ${profile.name}`}></Link>
+      <Link to={chatLink} className="absolute inset-0" aria-label={`Chatter avec ${profile.name}`}></Link>
       <Button 
         size="icon" 
         variant="ghost"
         className="absolute top-2 right-2 bg-black/30 hover:bg-pink-500/70 text-white rounded-full w-9 h-9 opacity-0 group-hover:opacity-100 transition-opacity"
         asChild
       >
-        <Link to={`/chat/${profile.id}`}>
+        <Link to={chatLink}>
           <MessageSquare size={18} />
         </Link>
       </Button>
@@ -58,14 +66,33 @@ const MatchCard = ({ profile, index }) => {
 const MatchesPage = () => {
   const { currentUser } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
-  const [matchedProfilesList, setMatchedProfilesList] = useState(
-    initialMockMatchedProfiles.map(profile => ({
-      ...profile,
-      age: Math.floor(Math.random() * 10) + 20, 
-      commonInterests: Math.floor(Math.random() * 5),
-      mediaRating: Math.floor(Math.random() * 5) + 1 // Note de 1 à 5 étoiles
-    }))
-  );
+  
+  // Utiliser les matchs dynamiques au lieu des données statiques
+  const [matchedProfilesList, setMatchedProfilesList] = useState([]);
+  
+  // Mettre à jour la liste des matchs quand elle change
+  useEffect(() => {
+    const matches = getMatches();
+    const conversations = getConversations();
+    
+    const enrichedMatches = matches.map(match => {
+      // Trouver la conversation correspondante à ce match
+      const conversation = conversations.find(conv => conv.matchId === match.id);
+      
+      return {
+        ...match,
+        avatarImage: match.avatar,
+        online: Math.random() > 0.5, // Simulation statut en ligne
+        lastActivity: 'Actif récemment',
+        commonInterests: Math.floor(Math.random() * 5),
+        mediaRating: Math.floor(Math.random() * 5) + 1,
+        conversationId: conversation ? conversation.id : null,
+        hasConversation: !!conversation
+      };
+    });
+    setMatchedProfilesList(enrichedMatches);
+  }, []);
+
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [availableStories, setAvailableStories] = useState([]);
@@ -305,7 +332,12 @@ const MatchesPage = () => {
         {sortedProfiles.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pb-4">
             {sortedProfiles.map((profile, index) => (
-              <MatchCard key={profile.id} profile={profile} index={index} />
+              <MatchCard 
+                key={profile.id} 
+                profile={profile} 
+                index={index} 
+                conversationId={profile.conversationId}
+              />
             ))}
           </div>
         ) : (
