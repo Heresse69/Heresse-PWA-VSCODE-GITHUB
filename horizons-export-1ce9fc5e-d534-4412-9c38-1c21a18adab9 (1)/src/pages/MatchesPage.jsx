@@ -159,23 +159,27 @@ const MatchesPage = () => {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
-      <div className="flex-shrink-0 p-4 pb-0">
+      {/* Container des stories uniquement */}
+      <div className="flex-shrink-0 px-4 pt-4 pb-0">
         <StoriesSection 
           usersList={matchedProfilesList}
           currentUser={currentUser}
           onStoryClick={openStoryViewer}
           onStoriesReady={handleStoriesReady}
         />
+      </div>
 
-        <div className="relative mb-5">
+      {/* Barre de recherche dans son propre container */}
+      <div className="flex-shrink-0 px-4 pb-4">
+        <div className="relative">
           <Input
             type="text"
             placeholder="Rechercher un match..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-pink-500 focus:border-pink-500 pl-10 rounded-full py-2.5"
+            className="bg-slate-700 border-slate-600 text-white placeholder-gray-400 focus:ring-pink-500 focus:border-pink-500 pl-14 pr-4 rounded-full py-2.5 w-full text-sm"
           />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 flex-shrink-0" />
         </div>
       </div>
 

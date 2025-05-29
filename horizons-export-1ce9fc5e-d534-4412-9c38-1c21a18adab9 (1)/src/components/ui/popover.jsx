@@ -1,25 +1,36 @@
 import * as React from "react"
-import * as PopoverPrimitive from "@radix-ui/react-popover"
 import { cn } from "@/lib/utils"
 
-const Popover = PopoverPrimitive.Root
+// Version simplifiée sans Radix UI en attendant l'installation
+const Popover = ({ children, open, onOpenChange }) => {
+  return (
+    <div className="relative">
+      {children}
+    </div>
+  )
+}
 
-const PopoverTrigger = PopoverPrimitive.Trigger
-
-const PopoverContent = React.forwardRef(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
-  <PopoverPrimitive.Portal>
-    <PopoverPrimitive.Content
-      ref={ref}
-      align={align}
-      sideOffset={sideOffset}
-      className={cn(
-        "z-50 w-72 rounded-md border bg-slate-800 p-4 text-white shadow-md outline-none",
-        className
-      )}
-      {...props}
-    />
-  </PopoverPrimitive.Portal>
+const PopoverTrigger = React.forwardRef(({ className, children, ...props }, ref) => (
+  <div ref={ref} className={cn(className)} {...props}>
+    {children}
+  </div>
 ))
-PopoverContent.displayName = PopoverPrimitive.Content.displayName
+
+const PopoverContent = React.forwardRef(({ className, children, align = "center", ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "absolute z-50 w-72 rounded-md border bg-slate-800 p-4 text-white shadow-md",
+      align === "end" ? "right-0" : "left-0",
+      className
+    )}
+    {...props}
+  >
+    {children}
+  </div>
+))
+
+PopoverTrigger.displayName = "PopoverTrigger"
+PopoverContent.displayName = "PopoverContent"
 
 export { Popover, PopoverTrigger, PopoverContent }

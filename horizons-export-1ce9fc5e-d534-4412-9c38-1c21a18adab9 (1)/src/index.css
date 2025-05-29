@@ -185,3 +185,91 @@ html, body {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
 }
+
+/* Fix pour le scroll horizontal des stories sur mobile */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Améliorer le scroll tactile sur iOS */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* S'assurer que les flex items ne se superposent pas */
+.flex-shrink-0 {
+  flex-shrink: 0 !important;
+  min-width: fit-content;
+}
+
+/* Fix spécifique pour les images des stories SEULEMENT - avec sélecteurs très précis */
+.flex.space-x-3.overflow-x-auto img.rounded-full {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  flex-shrink: 0;
+}
+
+/* Containers des stories - sélecteurs très spécifiques */
+.flex.space-x-3.overflow-x-auto .w-16.h-16.rounded-full {
+  width: 4rem !important;
+  height: 4rem !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+}
+
+.flex.space-x-3.overflow-x-auto .w-14.h-14.rounded-full {
+  width: 3.5rem !important;
+  height: 3.5rem !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+}
+
+/* S'assurer que les inputs ne débordent pas sur mobile */
+input[type="text"] {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Container de la barre de recherche */
+.relative input {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Fix pour l'icône de recherche sur mobile */
+@media (max-width: 768px) {
+  /* Force le padding left sur mobile */
+  .pl-14 {
+    padding-left: 3.5rem !important;
+  }
+  
+  /* Position fixe de l'icône sur mobile */
+  .absolute.left-5 {
+    left: 1.25rem !important;
+  }
+  
+  /* S'assurer que l'icône ne bouge pas */
+  .flex-shrink-0 {
+    flex-shrink: 0 !important;
+  }
+  
+  /* Taille du texte plus petite sur mobile si nécessaire */
+  input[type="text"].text-sm {
+    font-size: 0.875rem !important;
+  }
+}
+
+/* Style pour la barre de recherche sur toutes les tailles */
+input[type="text"]::placeholder {
+  color: rgb(156 163 175) !important;
+  opacity: 1 !important;
+}

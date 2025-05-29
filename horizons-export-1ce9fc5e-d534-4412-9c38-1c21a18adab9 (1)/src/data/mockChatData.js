@@ -42,7 +42,7 @@ export const mockMatchesData = [
 			'https://images.unsplash.com/photo-1582233479366-6d38bc390a08?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
 			'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
 		],
-		lastMessage: 'À bientôt j\'espère :)',
+		lastMessage: 'A bientot j\'espere :)',
 		timestamp: '12:20',
 		unread: 1,
 		online: true,
