@@ -5,8 +5,25 @@ import React, { useState } from 'react';
     import { Badge } from '@/components/ui/badge';
     import { MapPin, ShieldCheck, Star as StarIcon } from 'lucide-react';
 
-    const ProfileCardComponent = ({ profile, isTopCard, onSwipe, isSwiping }) => {
+    const ProfileCardComponent = ({ profile, isTopCard, isPWA, onSwipe, isSwiping }) => {
       const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+      
+      // Détection du mode PWA forcé pour le test
+      const [isTestPWA, setIsTestPWA] = useState(false);
+      
+      React.useEffect(() => {
+        const checkTestPWA = () => {
+          setIsTestPWA(document.body.classList.contains('force-pwa-test'));
+        };
+        
+        checkTestPWA();
+        const observer = new MutationObserver(checkTestPWA);
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        
+        return () => observer.disconnect();
+      }, []);
+      
+      const isEffectivePWA = isPWA || isTestPWA;
 
       const nextPhoto = (e) => {
         e.stopPropagation();
@@ -34,17 +51,27 @@ import React, { useState } from 'react';
       const averageRating = profile.mediaSoldRating || 0;
 
       return (
-        <Card className="w-full h-full rounded-xl overflow-hidden shadow-xl bg-slate-900 border-slate-700 flex flex-col select-none max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto min-h-[320px] sm:min-h-[380px] md:min-h-[450px]">
-          <CardHeader className="p-0 relative flex-grow cursor-default min-h-[240px] sm:min-h-[300px] md:min-h-[360px]" onClick={!isSwiping ? handleImageTap : undefined}>
+        <Card className={`w-full h-full rounded-xl overflow-hidden shadow-xl bg-slate-900 border-slate-700 flex flex-col select-none max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto ${
+          isEffectivePWA 
+            ? 'min-h-[480px] sm:min-h-[580px] md:min-h-[680px] pwa-profile-card' 
+            : 'min-h-[320px] sm:min-h-[380px] md:min-h-[450px]'
+        }`}>
+          <CardHeader className={`p-0 relative flex-grow cursor-default ${
+            isEffectivePWA 
+              ? 'min-h-[360px] sm:min-h-[460px] md:min-h-[540px]' 
+              : 'min-h-[240px] sm:min-h-[300px] md:min-h-[360px]'
+          }`} onClick={!isSwiping ? handleImageTap : undefined}>
             <AnimatePresence initial={false} mode="wait">
               <motion.img
                 key={profile.id + '-' + currentPhotoIndex}
                 src={profile.photos[currentPhotoIndex]}
                 alt={`${profile.name}'s photo ${currentPhotoIndex + 1}`}
-                className="absolute inset-0 w-full h-full object-cover object-center"
-                initial={{ opacity: 0.8, scale: 1.02 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0.8, scale: 1.02 }}
+                className={`absolute inset-0 w-full h-full object-cover ${
+                  isEffectivePWA ? 'object-center scale-105' : 'object-center'
+                }`}
+                initial={{ opacity: 0.8, scale: isEffectivePWA ? 1.07 : 1.02 }}
+                animate={{ opacity: 1, scale: isEffectivePWA ? 1.05 : 1 }}
+                exit={{ opacity: 0.8, scale: isEffectivePWA ? 1.07 : 1.02 }}
                 transition={{ duration: 0.2 }}
               />
             </AnimatePresence>
@@ -62,7 +89,11 @@ import React, { useState } from 'react';
               ))}
             </div>
             
-            <div className="absolute bottom-0 left-0 right-0 p-2 pt-6 sm:p-3 sm:pt-10 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-white pointer-events-none">
+            <div className={`absolute bottom-0 left-0 right-0 p-2 pt-6 sm:p-3 sm:pt-10 text-white pointer-events-none ${
+              isEffectivePWA 
+                ? 'pwa-card-gradient' 
+                : 'bg-gradient-to-t from-black/90 via-black/60 to-transparent'
+            }`}>
               <div className="flex items-center justify-between mb-1 flex-wrap gap-1">
                 <Link 
                   to={`/profile/${profile.id}`} 

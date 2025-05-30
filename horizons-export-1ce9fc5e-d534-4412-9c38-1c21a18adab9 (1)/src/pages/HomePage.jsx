@@ -5,10 +5,12 @@ import { Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/components/ui/use-toast';
+import { usePWA } from '@/hooks/usePWA';
 import CardWrapper from '@/components/features/swipe/CardWrapper';
 import ProfileCardComponent from '@/components/features/swipe/ProfileCardComponent';
 import MatchAnimationOverlay from '@/components/features/swipe/MatchAnimationOverlay';
 import ActionButtons from '@/components/features/swipe/ActionButtons';
+import PWADebug from '@/components/debug/PWADebug';
 import { initialMockProfilesData } from '@/data/mockProfiles';
 import { addMatch, createMatchConversation } from '@/data/mockChatData';
 
@@ -19,9 +21,27 @@ const HomePage = () => {
   const topCardControls = useAnimation();
   const { currentUser, updatePremiumStatus } = useUser();
   const { toast } = useToast();
+  const { isPWA } = usePWA();
   const navigate = useNavigate();
   const isMounted = useRef(true);
   const [isSwiping, setIsSwiping] = useState(false);
+  
+  // Détection du mode PWA forcé pour le test
+  const [isTestPWA, setIsTestPWA] = useState(false);
+  
+  useEffect(() => {
+    const checkTestPWA = () => {
+      setIsTestPWA(document.body.classList.contains('force-pwa-test'));
+    };
+    
+    checkTestPWA();
+    const observer = new MutationObserver(checkTestPWA);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  const isEffectivePWA = isPWA || isTestPWA;
 
   const [showMatchAnimation, setShowMatchAnimation] = useState(false);
   const [matchedProfileData, setMatchedProfileData] = useState(null);
@@ -238,9 +258,14 @@ const HomePage = () => {
 
   return (
     <div className="relative w-full h-screen flex flex-col bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
+      <PWADebug />
       {/* Zone principale - carte collée au header global */}
       <div className="flex-1 flex flex-col">
-        <div className="w-full max-w-md aspect-[3/4] relative mx-auto px-2">
+        <div className={`w-full max-w-md relative mx-auto px-2 ${
+          isEffectivePWA 
+            ? 'aspect-[3/5] min-h-[500px] sm:min-h-[600px]' 
+            : 'aspect-[3/4]'
+        }`}>
           <AnimatePresence>
             {/* Afficher jusqu'à 3 cartes en superposition */}
             {profiles.slice(currentIndex, currentIndex + 3).map((profile, index) => {
@@ -275,6 +300,7 @@ const HomePage = () => {
                   <ProfileCardComponent 
                     profile={profile} 
                     isTopCard={isTopCard} 
+                    isPWA={isEffectivePWA}
                     onSwipe={isTopCard ? triggerSwipe : undefined} 
                     isSwiping={isTopCard ? isSwiping : false}
                   />
