@@ -20,6 +20,7 @@ import React from 'react';
     import WithdrawFundsPage from '@/pages/WithdrawFundsPage';
     import ProtectedRoute from '@/components/ProtectedRoute';
     import MainLayout from '@/components/layouts/MainLayout';
+    import PWAWrapper from '@/components/PWAWrapper';
     import { UserProvider } from '@/contexts/UserContext';
     import CreateStoryPage from '@/pages/CreateStoryPage';
     import ViewStoryPage from '@/pages/ViewStoryPage';
@@ -157,7 +158,9 @@ import React from 'react';
       return (
         <UserProvider>
           <Router>
-            <AppContent />
+            <PWAWrapper>
+              <AppContent />
+            </PWAWrapper>
           </Router>
         </UserProvider>
       );

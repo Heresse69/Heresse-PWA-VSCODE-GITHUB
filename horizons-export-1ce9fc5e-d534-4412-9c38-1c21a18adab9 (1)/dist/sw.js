@@ -1,7 +1,7 @@
 /* eslint-env serviceworker */
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'heresse-cache-v1';
+const CACHE_NAME = 'heresse-cache-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -12,6 +12,7 @@ const PRECACHE_ASSETS = [
   '/icons/android-chrome-512x512.png'
 ];
 
+// Install event
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -29,6 +30,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
+// Activate event
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -48,30 +50,56 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Fetch event - Enhanced for PWA navigation
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // Handle navigation requests (page requests)
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match(event.request)
+      fetch(event.request)
         .then((response) => {
-          if (response) {
-            console.log('[Service Worker] Serving from cache:', event.request.url);
-            return response;
-          }
-          return fetch(event.request)
-            .then((networkResponse) => {
-              console.log('[Service Worker] Serving from network:', event.request.url);
-              return networkResponse;
-            })
-            .catch(() => {
-              console.log('[Service Worker] Fetch failed, serving offline page from cache for navigation');
-              return caches.match('/index.html'); 
+          console.log('[Service Worker] Serving navigation from network:', event.request.url);
+          return response;
+        })
+        .catch(() => {
+          console.log('[Service Worker] Navigation failed, serving app shell from cache');
+          return caches.match('/index.html').then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Fallback to a simple offline page if cache fails
+            return new Response(`
+              <!DOCTYPE html>
+              <html>
+                <head>
+                  <title>Heresse - Offline</title>
+                  <meta charset="utf-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1">
+                  <style>
+                    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                    .offline { color: #666; }
+                  </style>
+                </head>
+                <body>
+                  <div class="offline">
+                    <h1>Heresse</h1>
+                    <p>Vous êtes hors ligne. Veuillez vérifier votre connexion Internet.</p>
+                  </div>
+                </body>
+              </html>
+            `, {
+              headers: { 'Content-Type': 'text/html' }
             });
+          });
         })
     );
     return;
   }
 
-  if (PRECACHE_ASSETS.some(asset => event.request.url.endsWith(asset.substring(asset.lastIndexOf('/')))) || event.request.url.startsWith(self.location.origin)) {
+  // Handle asset requests (JS, CSS, images, etc.)
+  if (PRECACHE_ASSETS.some(asset => event.request.url.endsWith(asset.substring(asset.lastIndexOf('/')))) || 
+      event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
       caches.match(event.request)
         .then((response) => {
@@ -83,18 +111,45 @@ self.addEventListener('fetch', (event) => {
             if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
               return networkResponse;
             }
+            
+            // Cache successful responses
             const responseToCache = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, responseToCache);
             });
+            
             console.log('[Service Worker] Serving asset from network and caching:', event.request.url);
             return networkResponse;
           });
         })
         .catch(error => {
           console.error('[Service Worker] Error fetching asset:', error);
-          
+          // Return a placeholder for failed asset requests
+          if (event.request.destination === 'image') {
+            return new Response('', { status: 404 });
+          }
         })
     );
   }
+});
+
+// Handle messages from the main thread
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// Notify clients when a new version is available
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    self.clients.matchAll().then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage({
+          type: 'SW_ACTIVATED',
+          message: 'Service Worker activated'
+        });
+      });
+    })
+  );
 });

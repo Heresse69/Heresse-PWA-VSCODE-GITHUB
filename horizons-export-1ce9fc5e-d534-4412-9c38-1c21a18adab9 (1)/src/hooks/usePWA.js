@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 
 export const usePWA = () => {
   const [isPWA, setIsPWA] = useState(false);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   useEffect(() => {
     const checkPWAMode = () => {
@@ -28,23 +30,52 @@ export const usePWA = () => {
           }
         };
         
+        // Prevent external navigation in PWA mode
+        const preventExternalNavigation = (e) => {
+          const target = e.target.closest('a');
+          if (target && target.href && target.href.startsWith('http') && !target.href.includes(window.location.origin)) {
+            e.preventDefault();
+            // Keep navigation within PWA context
+            return false;
+          }
+        };
+        
         document.addEventListener('touchmove', preventBehaviors, { passive: false });
         document.addEventListener('touchstart', preventBehaviors, { passive: false });
+        document.addEventListener('click', preventExternalNavigation, true);
         
         return () => {
           document.removeEventListener('touchmove', preventBehaviors);
           document.removeEventListener('touchstart', preventBehaviors);
+          document.removeEventListener('click', preventExternalNavigation, true);
         };
       }
     };
     
     checkPWAMode();
     
+    // Listen for PWA install events
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setIsInstallable(false);
+      setIsPWA(true);
+    };
+    
     const mediaQuery = window.matchMedia('(display-mode: standalone)');
     mediaQuery.addEventListener('change', checkPWAMode);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
     
     return () => {
       mediaQuery.removeEventListener('change', checkPWAMode);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
       // Nettoyer les styles PWA
       if (isPWA) {
         document.body.style.overscrollBehavior = '';
@@ -56,7 +87,7 @@ export const usePWA = () => {
         document.body.style.overflow = '';
       }
     };
-  }, []);
+  }, [isPWA]);
 
   const getPWAStyles = () => {
     return isPWA ? {
@@ -72,8 +103,24 @@ export const usePWA = () => {
     return isPWA ? 'pwa-page' : '';
   };
 
+  const installApp = async () => {
+    if (!deferredPrompt) return false;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setIsInstallable(false);
+    }
+
+    return outcome === 'accepted';
+  };
+
   return {
     isPWA,
+    isInstallable,
+    installApp,
     getPWAStyles,
     getPWAClasses
   };
