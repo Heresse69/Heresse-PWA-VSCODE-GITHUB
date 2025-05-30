@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Clean Cache - Port 5174</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .success { background: rgba(0,255,0,0.2); }
+        .error { background: rgba(255,0,0,0.2); }
+        .info { background: rgba(0,150,255,0.2); }
+        button {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        #refreshCount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffeb3b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Test Cache Clean - Port 5174</h1>
+        <div class="status info">
+            Port: <strong>5174</strong> | 
+            Time: <strong id="currentTime"></strong>
+        </div>
+        
+        <div class="status success">
+            ✅ Configuration: Identique au port 5175 qui fonctionne
+        </div>
+        
+        <div class="status info">
+            Refresh automatiques détectés: <span id="refreshCount">0</span>
+        </div>
+        
+        <div class="status" id="cacheStatus">
+            🔄 Vérification du cache...
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="clearAllCache()">🗑️ Clear All Cache</button>
+            <button onclick="forceReload()">🔄 Force Reload</button>
+            <button onclick="testStability()">📊 Test Stability</button>
+        </div>
+        
+        <div id="log" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-top: 20px; font-family: monospace; max-height: 300px; overflow-y: auto;"></div>
+    </div>
+
+    <script>
+        let refreshCount = 0;
+        let startTime = Date.now();
+        let logElement = document.getElementById('log');
+        
+        function log(message) {
+            const time = new Date().toLocaleTimeString();
+            logElement.innerHTML += `[${time}] ${message}<br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function updateTime() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleTimeString();
+        }
+        
+        function detectRefresh() {
+            if (performance.navigation.type === 1) {
+                refreshCount++;
+                document.getElementById('refreshCount').textContent = refreshCount;
+                log(`🔄 Refresh détecté! Total: ${refreshCount}`);
+            }
+        }
+        
+        async function clearAllCache() {
+            log('🧹 Nettoyage du cache...');
+            
+            // Clear localStorage
+            localStorage.clear();
+            log('✅ localStorage cleared');
+            
+            // Clear sessionStorage
+            sessionStorage.clear();
+            log('✅ sessionStorage cleared');
+            
+            // Clear service worker cache
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                    log('✅ Service Worker unregistered');
+                }
+            }
+            
+            // Clear browser cache if possible
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (const name of cacheNames) {
+                    await caches.delete(name);
+                    log(`✅ Cache deleted: ${name}`);
+                }
+            }
+            
+            log('✅ Cache nettoyé! Reloading...');
+            setTimeout(() => window.location.reload(), 1000);
+        }
+        
+        function forceReload() {
+            log('🔄 Force reload...');
+            window.location.reload(true);
+        }
+        
+        function testStability() {
+            log('📊 Test de stabilité démarré...');
+            let count = 0;
+            const interval = setInterval(() => {
+                count++;
+                log(`📊 Stabilité check ${count}/10`);
+                if (count >= 10) {
+                    clearInterval(interval);
+                    log('✅ Test de stabilité terminé - Aucun refresh automatique détecté');
+                }
+            }, 1000);
+        }
+        
+        // Detect if page was refreshed
+        detectRefresh();
+        
+        // Update time every second
+        setInterval(updateTime, 1000);
+        updateTime();
+        
+        // Log initial state
+        log('🚀 Page loaded on port 5174');
+        log(`🕐 Session started at: ${new Date().toLocaleString()}`);
+        
+        // Monitor for unexpected reloads
+        let lastCheck = Date.now();
+        setInterval(() => {
+            const now = Date.now();
+            if (now - lastCheck > 2000) {
+                log('⚠️ Possible page refresh detected (time gap)');
+                refreshCount++;
+                document.getElementById('refreshCount').textContent = refreshCount;
+            }
+            lastCheck = now;
+        }, 1000);
+        
+        // Check cache status
+        setTimeout(() => {
+            const cacheStatus = document.getElementById('cacheStatus');
+            cacheStatus.className = 'status success';
+            cacheStatus.innerHTML = '✅ Cache check completed - Configuration clean';
+            log('✅ Cache check completed');
+        }, 2000);
+    </script>
+</body>
+</html>

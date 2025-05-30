@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>Test Mobile - Heresse</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-item {
+            background: #1e293b;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ec4899;
+        }
+        .success { border-left-color: #10b981; }
+        .error { border-left-color: #ef4444; }
+        .warning { border-left-color: #f59e0b; }
+        button {
+            background: #ec4899;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        #results {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #111;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Diagnostic Mobile - Heresse PWA</h1>
+    
+    <div class="test-item">
+        <h3>📱 Informations Appareil</h3>
+        <div id="device-info"></div>
+    </div>
+    
+    <div class="test-item">
+        <h3>🌐 Test de Connectivité</h3>
+        <button onclick="testConnectivity()">Tester la Connexion</button>
+        <button onclick="testMainApp()">Tester App Principale</button>
+    </div>
+    
+    <div class="test-item">
+        <h3>🔍 Mode PWA</h3>
+        <div id="pwa-status"></div>
+    </div>
+    
+    <div class="test-item">
+        <h3>📊 Résultats des Tests</h3>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#60a5fa';
+            results.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function detectDevice() {
+            const info = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                online: navigator.onLine,
+                cookieEnabled: navigator.cookieEnabled,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                viewportWidth: window.innerWidth,
+                viewportHeight: window.innerHeight,
+                devicePixelRatio: window.devicePixelRatio
+            };
+
+            const deviceDiv = document.getElementById('device-info');
+            deviceDiv.innerHTML = Object.entries(info)
+                .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+                .join('<br>');
+
+            log(`Appareil détecté: ${info.platform} - ${info.screenWidth}x${info.screenHeight}`, 'info');
+        }
+
+        function detectPWA() {
+            const isPWA = window.navigator.standalone === true || 
+                         window.matchMedia('(display-mode: standalone)').matches ||
+                         window.matchMedia('(display-mode: fullscreen)').matches ||
+                         window.matchMedia('(display-mode: minimal-ui)').matches;
+
+            const isInWebView = window.navigator.userAgent.includes('wv');
+            const isInApp = window.navigator.userAgent.includes('GSA') || 
+                           window.navigator.userAgent.includes('FxiOS') ||
+                           window.navigator.userAgent.includes('CriOS');
+
+            const status = document.getElementById('pwa-status');
+            status.innerHTML = `
+                <strong>Mode PWA:</strong> ${isPWA ? '✅ Oui' : '❌ Non'}<br>
+                <strong>WebView:</strong> ${isInWebView ? '⚠️ Oui' : '✅ Non'}<br>
+                <strong>App intégrée:</strong> ${isInApp ? '⚠️ Oui' : '✅ Non'}<br>
+                <strong>Standalone:</strong> ${window.navigator.standalone ? '✅ Oui' : '❌ Non'}
+            `;
+
+            log(`Mode PWA: ${isPWA}, WebView: ${isInWebView}, InApp: ${isInApp}`, isPWA ? 'success' : 'warning');
+        }
+
+        async function testConnectivity() {
+            log('🔄 Test de connectivité...', 'info');
+            
+            const urls = [
+                'http://localhost:5174',
+                'http://10.0.0.134:5174',
+                window.location.origin
+            ];
+
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url, { 
+                        method: 'HEAD',
+                        mode: 'no-cors'
+                    });
+                    log(`✅ ${url} - Accessible`, 'success');
+                } catch (error) {
+                    log(`❌ ${url} - Erreur: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function testMainApp() {
+            log('🚀 Test de l\'application principale...', 'info');
+            
+            try {
+                const appUrl = window.location.origin;
+                const response = await fetch(appUrl);
+                
+                if (response.ok) {
+                    log(`✅ Application accessible à ${appUrl}`, 'success');
+                    log('🔗 Redirection vers l\'app...', 'info');
+                    setTimeout(() => {
+                        window.location.href = appUrl;
+                    }, 2000);
+                } else {
+                    log(`❌ Application non accessible - Status: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Erreur lors du test: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🔧 Diagnostic démarré...', 'info');
+            detectDevice();
+            detectPWA();
+            
+            // Test automatique au chargement
+            setTimeout(testConnectivity, 1000);
+        });
+
+        // Gestion des erreurs globales
+        window.addEventListener('error', (event) => {
+            log(`❌ Erreur JavaScript: ${event.error.message}`, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            log(`❌ Promise rejetée: ${event.reason}`, 'error');
+        });
+    </script>
+</body>
+</html>

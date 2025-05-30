@@ -2,42 +2,103 @@
 <html lang="fr">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="generator" content="Hostinger Horizons" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-		<title>Heresse</title>
-		<meta name="description" content="Heresse - Rencontres et plus." />
+		<meta name="generator" content="Heresse PWA" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+		<title>Heresse - Dating App</title>
+		<meta name="description" content="Heresse - Application de rencontres moderne pour des connexions authentiques" />
+		<meta name="keywords" content="rencontres, dating, app, romance, connexions, chat" />
+		<meta name="author" content="Heresse Team" />
 
+		<!-- Favicon and Icons -->
 		<link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
 		<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
 		<link rel="apple-touch-icon" sizes="192x192" href="/icons/apple-touch-icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="/icons/apple-touch-icon-512x512.png">
+		<link rel="apple-touch-icon" sizes="512x512" href="/icons/apple-touch-icon-512x512.png">
 
-		<meta name="theme-color" content="#111827" />
+		<!-- PWA Theme and Status Bar -->
+		<meta name="theme-color" content="#ec4899" />
+		<meta name="msapplication-TileColor" content="#ec4899" />
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		<meta name="apple-mobile-web-app-title" content="Heresse">
 		
-		<!-- PWA manifest -->
+		<!-- PWA Manifest -->
 		<link rel="manifest" href="/manifest.json">
 		
-		<!-- Prevent external navigation in PWA mode -->
+		<!-- PWA Early Protection Script - Loaded as early as possible -->
+		<script src="/pwa-init.js"></script>
+		
+		<!-- Enhanced PWA Support -->
 		<meta name="apple-touch-fullscreen" content="yes">
 		<meta name="format-detection" content="telephone=no">
-
+		<meta name="format-detection" content="date=no">
+		<meta name="format-detection" content="address=no">
+		<meta name="format-detection" content="email=no">
+		
+		<!-- Prevent zoom and selection -->
+		<meta name="msapplication-tap-highlight" content="no">
+		<meta name="msapplication-config" content="/browserconfig.xml">
+		
+		<!-- iOS Safari PWA enhancements -->
+		<meta name="apple-mobile-web-app-orientations" content="portrait">
+		<meta name="supported-color-schemes" content="dark">
+		
+		<!-- Startup Images for iOS -->
 		<link rel="apple-touch-startup-image" href="/icons/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/icons/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/icons/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/icons/splash-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/icons/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/icons/splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/icons/splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/icons/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="/icons/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+		<link rel="apple-touch-startup-image" href="/icons/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+		<link rel="apple-touch-startup-image" href="/icons/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+		<link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+		<link rel="apple-touch-startup-image" href="/icons/splash-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+		<link rel="apple-touch-startup-image" href="/icons/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+		<link rel="apple-touch-startup-image" href="/icons/splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+		<link rel="apple-touch-startup-image" href="/icons/splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+		<link rel="apple-touch-startup-image" href="/icons/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+		<link rel="apple-touch-startup-image" href="/icons/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
 
-		<script type="module" crossorigin src="/assets/index-59f1adb9.js"></script>
-		<link rel="stylesheet" href="/assets/index-0a6fad9a.css">
+		<!-- Critical CSS for PWA loading -->
+		<style>
+			/* Prevent flash of unstyled content */
+			body {
+				margin: 0;
+				padding: 0;
+				background: #0a0a0b;
+				color: #ffffff;
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+				overflow: hidden;
+			}
+			
+			#root {
+				height: 100vh;
+				width: 100vw;
+				overflow: hidden;
+			}
+			
+			/* Loading spinner */
+			.app-loading {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 100vh;
+				background: #0a0a0b;
+			}
+			
+			.spinner {
+				width: 40px;
+				height: 40px;
+				border: 4px solid #ec4899;
+				border-top: 4px solid transparent;
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
+			}
+			
+			@keyframes spin {
+				0% { transform: rotate(0deg); }
+				100% { transform: rotate(360deg); }
+			}
+		</style>
+		<script type="module" crossorigin src="/assets/index-cef3b02c.js"></script>
+		<link rel="stylesheet" href="/assets/index-eba36c53.css">
 		<script type="module">
 window.onerror = (message, source, lineno, colno, errorObj) => {
 	const errorDetails = errorObj ? JSON.stringify({
@@ -167,7 +228,11 @@ window.fetch = function(...args) {
 </script>
 	</head>
 	<body>
-		<div id="root"></div>
+		<div id="root">
+			<div class="app-loading">
+				<div class="spinner"></div>
+			</div>
+		</div>
 		
 	</body>
 </html>

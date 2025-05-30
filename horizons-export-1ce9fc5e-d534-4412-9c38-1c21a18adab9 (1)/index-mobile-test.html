@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <title>Test PWA Mobile</title>
+    <link rel="manifest" href="./manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        #root {
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* PWA Standalone Mode */
+        @media (display-mode: standalone) {
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: rgba(255,0,0,0.3);
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <h2>Chargement de l'application...</h2>
+            <p>Si cette page reste visible, il y a un problème de chargement.</p>
+        </div>
+    </div>
+
+    <script>
+        // Debug console override
+        const logs = [];
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logs.push(`LOG: ${args.join(' ')}`);
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            logs.push(`ERROR: ${args.join(' ')}`);
+        };
+        
+        // Capture des erreurs globales
+        window.onerror = function(msg, url, line, col, error) {
+            const errorMsg = `JavaScript Error: ${msg} at ${url}:${line}:${col}`;
+            console.error(errorMsg);
+            showError(errorMsg, error);
+            return false;
+        };
+        
+        window.addEventListener('unhandledrejection', function(event) {
+            const errorMsg = `Unhandled Promise Rejection: ${event.reason}`;
+            console.error(errorMsg);
+            showError(errorMsg);
+        });
+        
+        function showError(message, error = null) {
+            const root = document.getElementById('root');
+            const errorHtml = `
+                <div class="error">
+                    <h3>❌ Erreur détectée</h3>
+                    <p><strong>Message:</strong> ${message}</p>
+                    ${error ? `<p><strong>Stack:</strong> <pre>${error.stack}</pre></p>` : ''}
+                    <hr>
+                    <h4>Console Logs:</h4>
+                    <div style="font-size: 12px; max-height: 200px; overflow-y: auto;">
+                        ${logs.map(log => `<div>${log}</div>`).join('')}
+                    </div>
+                    <hr>
+                    <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                    <p><strong>Viewport:</strong> ${window.innerWidth}x${window.innerHeight}</p>
+                </div>
+            `;
+            root.innerHTML = errorHtml;
+        }
+        
+        // Timeout de sécurité
+        setTimeout(() => {
+            const loadingDiv = document.querySelector('.loading');
+            if (loadingDiv && loadingDiv.style.display !== 'none') {
+                showError('Timeout: L\'application n\'a pas pu se charger dans les 5 secondes');
+            }
+        }, 5000);
+    </script>
+    
+    <script type="module" src="./src/main-mobile-test.jsx"></script>
+</body>
+</html>

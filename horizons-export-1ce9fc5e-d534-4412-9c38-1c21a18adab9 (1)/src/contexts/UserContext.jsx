@@ -333,7 +333,6 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
         MIN_PROFILE_PHOTOS,
         MAX_PRIVATE_GALLERY_ITEMS,
         seenStories,
-        markStoryAsSeen,
       };
 
       return (
