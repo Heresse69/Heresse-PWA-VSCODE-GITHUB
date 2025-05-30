@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useUser } from '@/contexts/UserContext';
 import useChatLogic from '@/hooks/useChatLogic';
 import useChatModals from '@/hooks/useChatModals';
-import { mockMatchesData } from '@/data/mockChatData';
+import { getConversations, getConversation } from '@/data/mockChatData';
 import StoryViewer from '@/components/StoryViewer';
 import ChatHeader from '@/components/chat/ChatHeader';
 import ChatMessageList from '@/components/chat/ChatMessageList';
@@ -102,7 +102,7 @@ const ChatPage = () => {
     currentChat, 
     setCurrentChat, 
     addMessageToChat 
-  } = useChatLogic(mockMatchesData, currentUser, matchId);
+  } = useChatLogic(getConversations(), currentUser, matchId);
 
   const {
     showPaymentModal, openPaymentModal, closePaymentModal, mediaToUnlock,
@@ -112,20 +112,34 @@ const ChatPage = () => {
   } = useChatModals();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [conversationsList, setConversationsList] = useState(
-    mockMatchesData.map(match => ({
-      ...match,
-      // Ajouter des propriétés pour les conversations
-    }))
-  );
+  const [conversationsList, setConversationsList] = useState([]);
   const [displayableStories, setDisplayableStories] = useState([]);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [newMessage, setNewMessage] = useState('');
 
+  // Charger les conversations et enrichir avec les données utilisateur
+  useEffect(() => {
+    const conversations = getConversations();
+    const enrichedConversations = conversations.map(conv => {
+      const userProfile = matches.find(m => m.id === conv.userId);
+      if (userProfile) {
+        return {
+          ...conv,
+          name: userProfile.name,
+          avatarImage: userProfile.avatarImage,
+          avatarText: userProfile.avatarText,
+          online: userProfile.online
+        };
+      }
+      return conv;
+    });
+    setConversationsList(enrichedConversations);
+  }, [matches]);
+
   useEffect(() => {
     if (currentUser && allStoriesFromContext) {
-      const matchedUserIds = new Set(conversationsList.map(conv => conv.id));
+      const matchedUserIds = new Set(conversationsList.map(conv => conv.userId || conv.id));
       const currentUserStory = allStoriesFromContext.find(s => s.userId === currentUser.id && s.userName === "Moi");
       const storiesFromMatches = allStoriesFromContext.filter(story => 
         matchedUserIds.has(story.userId) && story.userId !== currentUser.id

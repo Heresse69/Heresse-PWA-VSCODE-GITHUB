@@ -47,12 +47,14 @@ import React, { useState, useEffect, useCallback } from 'react';
             </div>
             <p className="text-xs text-gray-300 mb-1.5">{gallery.item_count || 0} média(s)</p>
             {isUnlocked ? (
-               <span className="text-xs bg-green-500/80 text-white px-2 py-0.5 rounded-full self-start flex items-center backdrop-blur-sm">
-                <Eye size={12} className="mr-1" /> Débloquée
+              <span className="text-xs bg-green-500/80 text-white px-2 py-1 rounded-full inline-flex items-center backdrop-blur-sm w-fit">
+                <Eye size={12} className="mr-1.5" />
+                Débloquée
               </span>
             ) : (
-              <span className="text-xs bg-primary/80 text-white px-2 py-0.5 rounded-full self-start flex items-center backdrop-blur-sm">
-                <Lock size={12} className="mr-1" /> {gallery.price ? `${gallery.price.toFixed(2)}€` : "Gratuit"}
+              <span className="text-xs bg-primary/80 text-white px-2 py-1 rounded-full inline-flex items-center backdrop-blur-sm w-fit">
+                <Lock size={12} className="mr-1.5" />
+                {gallery.price ? `${gallery.price.toFixed(2)}€` : "Gratuit"}
               </span>
             )}
           </div>

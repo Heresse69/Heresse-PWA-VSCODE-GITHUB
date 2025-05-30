@@ -20,6 +20,7 @@ import React from 'react';
     import WithdrawFundsPage from '@/pages/WithdrawFundsPage';
     import ProtectedRoute from '@/components/ProtectedRoute';
     import MainLayout from '@/components/layouts/MainLayout';
+    import PWAWrapper from '@/components/PWAWrapper';
     import { UserProvider } from '@/contexts/UserContext';
     import CreateStoryPage from '@/pages/CreateStoryPage';
     import ViewStoryPage from '@/pages/ViewStoryPage';
@@ -131,6 +132,7 @@ import React from 'react';
               <Route path="/matches" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><MatchesPage /></ProtectedRoute>} />
               <Route path="/chat" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><ChatPage /></ProtectedRoute>} />
               <Route path="/chat/:matchId" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><ChatPageConversation /></ProtectedRoute>} />
+              <Route path="/chat/*" element={<Navigate to="/chat" replace />} />
               <Route path="/galleries" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><PrivateGalleriesPage /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><ProfilePage onLogout={handleLogout} /></ProtectedRoute>} />
               <Route path="/profile/my-photos" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><MyPhotosPage /></ProtectedRoute>} />
@@ -156,7 +158,9 @@ import React from 'react';
       return (
         <UserProvider>
           <Router>
-            <AppContent />
+            <PWAWrapper>
+              <AppContent />
+            </PWAWrapper>
           </Router>
         </UserProvider>
       );

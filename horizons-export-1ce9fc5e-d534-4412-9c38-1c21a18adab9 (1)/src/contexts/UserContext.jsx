@@ -78,6 +78,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 
       const [stories, setStories] = useState(initialStoriesData);
       const [loading, setLoading] = useState(true);
+      const [seenStories, setSeenStories] = useState(new Set());
 
       const fetchUserProfile = useCallback(async (userId) => {
         const { data: userData, error: userError } = await supabase
@@ -293,7 +294,11 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
       const updatePrivateGalleryItemPrice = (itemId, newPrice, galleryId) => updatePrivateGalleryItemPriceLogic(setCurrentUser, itemId, newPrice, currentUser.id, galleryId);
       
       const addStory = (storyData) => addStoryLogic(currentUser, setStories, setCurrentUser, storyData);
-      const markStoryAsSeen = (storyId) => markStoryAsSeenLogic(setStories, setCurrentUser, storyId);
+      const markStoryAsSeen = (storyId) => {
+        console.log('📖 Marquer story comme vue:', storyId);
+        setSeenStories(prev => new Set([...prev, storyId]));
+        markStoryAsSeenLogic(setStories, setCurrentUser, storyId);
+      };
       
       const updateBio = (newBio) => {
         setCurrentUser(prev => ({ ...prev, bio: newBio }));
@@ -326,8 +331,14 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
         loading,
         MAX_PROFILE_PHOTOS,
         MIN_PROFILE_PHOTOS,
-        MAX_PRIVATE_GALLERY_ITEMS
+        MAX_PRIVATE_GALLERY_ITEMS,
+        seenStories,
+        markStoryAsSeen,
       };
 
-      return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+      return (
+        <UserContext.Provider value={value}>
+          {children}
+        </UserContext.Provider>
+      );
     };

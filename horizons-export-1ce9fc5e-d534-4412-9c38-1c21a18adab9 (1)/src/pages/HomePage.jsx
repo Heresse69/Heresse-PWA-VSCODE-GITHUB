@@ -10,6 +10,7 @@ import ProfileCardComponent from '@/components/features/swipe/ProfileCardCompone
 import MatchAnimationOverlay from '@/components/features/swipe/MatchAnimationOverlay';
 import ActionButtons from '@/components/features/swipe/ActionButtons';
 import { initialMockProfilesData } from '@/data/mockProfiles';
+import { addMatch, createMatchConversation } from '@/data/mockChatData';
 
 const HomePage = () => {
   const [profiles, setProfiles] = useState([...initialMockProfilesData]);
@@ -55,11 +56,37 @@ const HomePage = () => {
     setHistory(prev => [...prev, { profile: swipedProfile, direction }]);
 
     if (direction === 'right') {
+      // Ajouter le profil aux matchs quand on swipe vers la droite
+      const matchUser = {
+        id: swipedProfile.id,
+        name: swipedProfile.name,
+        avatar: swipedProfile.photos[0], // Première photo comme avatar
+        age: swipedProfile.age,
+        distance: swipedProfile.distance
+      };
+      
+      // Ajouter le match ET créer automatiquement la conversation
+      const newMatch = addMatch(matchUser);
+      const newConversation = createMatchConversation(matchUser);
+      
       setMatchedProfileData(swipedProfile);
       setShowMatchAnimation(true);
     } else if (direction === 'left') {
        toast({ title: "Non merci !", description: `Profil de ${swipedProfile.name} passé.`, duration: 2000, className: "bg-gradient-to-r from-rose-600 to-red-700 border-red-700 text-white shadow-lg" });
     } else if (direction === 'superlike') {
+        // Ajouter aussi le profil aux matchs pour un superlike
+        const matchUser = {
+          id: swipedProfile.id,
+          name: swipedProfile.name,
+          avatar: swipedProfile.photos[0],
+          age: swipedProfile.age,
+          distance: swipedProfile.distance
+        };
+        
+        // Ajouter le match ET créer automatiquement la conversation pour superlike aussi
+        const newMatch = addMatch(matchUser);
+        const newConversation = createMatchConversation(matchUser);
+        
         toast({ title: "Superlike !", description: `Vous avez envoyé un Superlike à ${swipedProfile.name} !`, duration: 2000, className: "bg-gradient-to-r from-blue-500 to-sky-600 border-blue-600 text-white shadow-lg" });
     }
 
@@ -283,7 +310,15 @@ const HomePage = () => {
             onClose={() => setShowMatchAnimation(false)}
             onSendMessage={() => {
               setShowMatchAnimation(false);
-              navigate(`/chat/${matchedProfileData.id}`);
+              // Rediriger vers la conversation nouvellement créée
+              const conversation = createMatchConversation({
+                id: matchedProfileData.id,
+                name: matchedProfileData.name,
+                avatar: matchedProfileData.photos[0],
+                age: matchedProfileData.age,
+                distance: matchedProfileData.distance
+              });
+              navigate(`/chat/${conversation.id}`);
             }}
           />
         )}

@@ -12,13 +12,18 @@
 		<link rel="apple-touch-icon" sizes="192x192" href="/icons/apple-touch-icon-192x192.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/icons/apple-touch-icon-512x512.png">
 
-		<link rel="manifest" href="./manifest.json" />
-
 		<meta name="theme-color" content="#111827" />
-<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		<meta name="apple-mobile-web-app-title" content="Heresse">
+		
+		<!-- PWA manifest -->
+		<link rel="manifest" href="/manifest.json">
+		
+		<!-- Prevent external navigation in PWA mode -->
+		<meta name="apple-touch-fullscreen" content="yes">
+		<meta name="format-detection" content="telephone=no">
 
 		<link rel="apple-touch-startup-image" href="/icons/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
     <link rel="apple-touch-startup-image" href="/icons/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
@@ -31,8 +36,8 @@
     <link rel="apple-touch-startup-image" href="/icons/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
     <link rel="apple-touch-startup-image" href="/icons/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
 
-		<script type="module" crossorigin src="/assets/index-7aa97069.js"></script>
-		<link rel="stylesheet" href="/assets/index-d616e62d.css">
+		<script type="module" crossorigin src="/assets/index-59f1adb9.js"></script>
+		<link rel="stylesheet" href="/assets/index-0a6fad9a.css">
 		<script type="module">
 window.onerror = (message, source, lineno, colno, errorObj) => {
 	const errorDetails = errorObj ? JSON.stringify({

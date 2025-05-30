@@ -76,7 +76,7 @@ import React, { useState } from 'react';
                   <MapPin size={14} className="mr-1.5" /> {profile.city} ({profile.distance})
               </div>
               {currentPhotoIndex === profile.referencePhotoIndex && 
-                  <Badge variant="secondary" className="mb-1 bg-gradient-to-r from-green-500/80 to-emerald-600/80 text-white text-[9px] px-1.5 py-0.5 shadow-md backdrop-blur-sm border-none">
+                  <Badge variant="secondary" className="mb-1 bg-gradient-to-r from-green-500/80 to-emerald-600/80 text-white text-[9px] px-2 py-1 shadow-md backdrop-blur-sm border-none inline-flex items-center w-fit rounded-full">
                       <ShieldCheck size={10} className="mr-1"/>Photo Vérifiée
                   </Badge>
               }
