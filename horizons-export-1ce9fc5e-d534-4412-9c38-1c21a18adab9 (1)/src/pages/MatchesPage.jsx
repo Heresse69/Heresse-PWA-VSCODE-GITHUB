@@ -218,7 +218,15 @@ const MatchesPage = () => {
         />
       )}
 
-      <div className="flex-1 overflow-y-auto px-4 pb-20">
+      <div 
+  className="flex-1 overflow-y-auto px-4 pb-20"
+  style={{
+    overflowY: 'scroll',
+    WebkitOverflowScrolling: 'touch',
+    height: 'auto',
+    maxHeight: '400px'
+  }}
+>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">
             Vos matchs ({sortedProfiles.length})

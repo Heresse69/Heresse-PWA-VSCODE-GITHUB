@@ -400,146 +400,169 @@ span.inline-flex svg {
   min-width: fit-content !important;
 }
 
-/* Tab bar complètement fixe */
-nav[style*="position: fixed"] {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  z-index: 50 !important;
-  transform: none !important;
-  will-change: auto !important;
-}
+/* === FIX PWA IPHONE - TABBAR EN BAS === */
 
-/* Empêcher tout mouvement de la tab bar */
-.fixed.bottom-0 {
-  position: fixed !important;
-  bottom: 0 !important;
-  transform: translateY(0) !important;
-}
-
-/* Tab bar ABSOLUMENT fixe - aucun mouvement autorisé */
-nav.fixed.bottom-0,
-nav[style*="position: fixed"] {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  z-index: 50 !important;
-  transform: translateY(0) !important;
-  -webkit-transform: translateY(0) !important;
-  -moz-transform: translateY(0) !important;
-  -ms-transform: translateY(0) !important;
-  will-change: auto !important;
-  backface-visibility: hidden !important;
-  -webkit-backface-visibility: hidden !important;
-}
-
-/* Empêcher le scroll de bouger la tab bar */
-body {
-  overscroll-behavior-y: contain !important;
-  overflow-anchor: none !important;
-}
-
-/* Force la tab bar à rester en place même avec les transitions */
-nav.fixed * {
-  transform: none !important;
-  -webkit-transform: none !important;
-  transition: none !important;
-  will-change: auto !important;
-}
-
-/* CSS spécifique pour les navigateurs mobiles */
-@media (max-width: 768px) {
-  nav.fixed.bottom-0 {
+/* Supprime la safe area visible en mode PWA */
+@media (display-mode: standalone) {
+  
+  /* Force le body à ne pas avoir de padding bottom */
+  body {
+    padding-bottom: 0 !important;
+    background: hsl(var(--background)) !important;
+  }
+  
+  html {
+    background: hsl(var(--background)) !important;
+  }
+  
+  /* Cache la safe area avec un pseudo-élément de même couleur */
+  body::after {
+    content: '' !important;
     position: fixed !important;
-    bottom: 0px !important;
-    transform: translate3d(0, 0, 0) !important;
-    -webkit-transform: translate3d(0, 0, 0) !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: env(safe-area-inset-bottom, 0px) !important;
+    background: hsl(var(--background)) !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+  }
+  
+  /* FORCE la TabBar à descendre VRAIMENT en bas (sur la safe area) */
+  nav[class*="fixed"][class*="bottom"] {
+    bottom: 0 !important;
+    z-index: 9999 !important;
+    transform: translateY(0) !important;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-width: 100vw !important;
   }
 }
-
-/* SOLUTION DEFINITIVE - Tab bar absolument immobile */
-html {
-  overflow-x: hidden !important;
-  overscroll-behavior: none !important;
-  height: 100% !important;
-}
-
-body {
-  overflow-x: hidden !important;
-  overscroll-behavior: none !important;
-  overscroll-behavior-y: none !important;
-  overscroll-behavior-x: none !important;
-  height: 100% !important;
-  position: relative !important;
-}
-
-/* Empêcher le scroll elastique sur iOS */
-body, html {
-  -webkit-overflow-scrolling: auto !important;
-  overflow-anchor: none !important;
-}
-
-/* Tab bar ULTRA fixe - RIEN ne peut la faire bouger */
-nav[class*="fixed"][class*="bottom-0"],
-nav.fixed.bottom-0 {
-  position: fixed !important;
-  bottom: 0px !important;
-  left: 0px !important;
-  right: 0px !important;
-  z-index: 9999 !important;
-  transform: translate3d(0, 0, 0) !important;
-  -webkit-transform: translate3d(0, 0, 0) !important;
-  -moz-transform: translate3d(0, 0, 0) !important;
-  -ms-transform: translate3d(0, 0, 0) !important;
-  will-change: auto !important;
-  backface-visibility: hidden !important;
-  -webkit-backface-visibility: hidden !important;
-  perspective: 1000px !important;
-  -webkit-perspective: 1000px !important;
-}
-
-/* Force la tab bar à ignorer tous les scrolls */
-nav[class*="fixed"] * {
-  transform: none !important;
-  -webkit-transform: none !important;
-  will-change: auto !important;
-  backface-visibility: hidden !important;
-}
-
-/* Empêcher le rubber band scrolling sur mobile */
-.flex.flex-col.h-full {
-  overscroll-behavior: none !important;
-  -webkit-overflow-scrolling: auto !important;
-}
-
-/* Container principal */
-#root {
-  overflow-x: hidden !important;
-  overscroll-behavior: none !important;
-  height: 100vh !important;
-  max-height: 100vh !important;
-}
-
-/* Main content - empêcher qu'il affecte la tab bar */
-main {
-  overscroll-behavior: none !important;
-  -webkit-overflow-scrolling: auto !important;
-}
-
-/* Fix pour les navigateurs mobiles spécifiquement */
-@supports (-webkit-touch-callout: none) {
-  body {
-    overscroll-behavior: none !important;
-    -webkit-overflow-scrolling: auto !important;
+/* FIX pour le container principal en mode PWA */
+@media (display-mode: standalone) {
+  .max-w-md.mx-auto.flex.flex-col {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
     position: relative !important;
   }
   
-  nav.fixed.bottom-0 {
+  .max-w-md.mx-auto.flex.flex-col::after {
+    display: none !important;
+    content: none !important;
+  }
+}
+/* === FIX SCROLL PWA === */
+@media (display-mode: standalone) {
+  
+  /* Force le scroll des listes de matchs et conversations */
+  .overflow-y-auto,
+  .scrollable,
+  main .overflow-y-auto,
+  .space-y-4,
+  .space-y-3,
+  .space-y-2 {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+  
+  /* Force spécifiquement les containers de listes */
+  main > div > div {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Assure que les headers restent visibles en PWA */
+  header {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     position: fixed !important;
-    bottom: 0px !important;
-    transform: translateZ(0) !important;
-    -webkit-transform: translateZ(0) !important;
+    z-index: 50 !important;
+  }
+  
+  /* Fix pour les conversations individuelles */
+  .h-full {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}/* === FIX SCROLL MATCHES & CHAT PAGE PWA === */
+@media (display-mode: standalone) {
+  
+  /* Force le scroll des containers principaux */
+  .flex-1.overflow-y-auto {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  
+  /* Force spécifiquement les containers avec gradient background */
+  .flex.flex-col.h-full.bg-gradient-to-b {
+    overflow: hidden !important;
+  }
+  
+  .flex.flex-col.h-full.bg-gradient-to-b > .flex-1 {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Force le scroll des listes spécifiques */
+  .grid.grid-cols-2,
+  .space-y-3 {
+    overflow: visible !important;
+  }
+  
+  /* Assure que les headers de conversation restent visibles */
+  header {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    z-index: 50 !important;
+  }
+}
+/* === FIX TOUCH/SCROLL PWA === */
+@media (display-mode: standalone) {
+  
+  /* Empêche les hover effects sur mobile PWA */
+  .hover\:bg-slate-600,
+  .group:hover,
+  .hover\:scale-105,
+  .transition-colors,
+  .transition-transform {
+    pointer-events: auto !important;
+    touch-action: pan-y !important;
+  }
+  
+  /* Force le scroll touch sur les containers */
+  .flex-1.overflow-y-auto {
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Empêche les hover sur les cards de matchs/chat */
+  .motion-div,
+  .bg-slate-700 {
+    touch-action: pan-y !important;
+  }
+  
+  /* Force le comportement de scroll au lieu de hover */
+  * {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    touch-action: manipulation !important;
+  }
+  
+  /* SAUF pour les éléments scrollables */
+  .overflow-y-auto,
+  .overflow-auto {
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 }

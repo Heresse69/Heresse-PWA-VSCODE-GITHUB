@@ -67,7 +67,7 @@ import React, { useState, useEffect } from 'react';
           </header>
 
           <div className="relative w-full aspect-[3/4] bg-slate-800">
-            <img  class="w-full h-full object-cover" alt={`${profileData.name} - photo ${currentImageIndex + 1}`} src="https://images.unsplash.com/photo-1652841190565-b96e0acbae17" />
+            <img className="w-8 h-8 object-cover rounded-full border-2 border-white" alt={`${profileData.name} - photo ${index + 1}`} src={image} />
             
             {profileData.profileImages.length > 1 && (
               <>
