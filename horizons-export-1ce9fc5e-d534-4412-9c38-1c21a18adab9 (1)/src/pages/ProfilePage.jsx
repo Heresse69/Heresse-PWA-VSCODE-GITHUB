@@ -6,12 +6,13 @@ import React from 'react';
     import { Settings, BarChart3, Wallet, EyeOff, ChevronRight, Zap, ShieldAlert, Image as ImageIcon, Edit3 } from 'lucide-react';
     import { useUser } from '@/contexts/UserContext';
     import { useNavigate } from 'react-router-dom';
+    import { useScrollLock } from '@/hooks/useScrollLock';
     import { cn } from '@/lib/utils';
 
     const ActionButton = ({ icon: Icon, label, onClick, className, bgColor = "bg-slate-800/60 hover:bg-slate-700/80" }) => (
-      <Button variant="ghost" className={cn(`flex flex-col items-center justify-center h-18 sm:h-20 w-full rounded-xl space-y-1 text-gray-300 hover:text-white transition-all duration-200 shadow-md p-2`, bgColor, className)} onClick={onClick} >
-        <Icon size={18} className="mb-1 text-primary" />
-        <span className="text-[9px] sm:text-[10px] text-center px-1 leading-tight">{label}</span>
+      <Button variant="ghost" className={cn(`flex flex-col items-center justify-center h-14 w-full rounded-xl space-y-0.5 text-gray-300 hover:text-white transition-all duration-200 shadow-md p-1.5`, bgColor, className)} onClick={onClick} >
+        <Icon size={16} className="mb-0.5 text-primary" />
+        <span className="text-[8px] text-center px-1 leading-tight">{label}</span>
       </Button>
     );
 
@@ -20,29 +21,32 @@ import React from 'react';
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className={cn("p-3.5 rounded-xl shadow-lg text-white overflow-hidden relative", gradientClass, isActive && !isManagement && "opacity-75")}
+            className={cn("p-2.5 rounded-xl shadow-lg text-white overflow-hidden relative", gradientClass, isActive && !isManagement && "opacity-75")}
         >
-            <div className="flex items-center mb-1.5">
-                <Icon size={20} className="mr-1.5" />
-                <h4 className="text-base font-semibold">{title} {isActive && "(Actif)"}</h4>
+            <div className="flex items-center mb-1">
+                <Icon size={16} className="mr-1" />
+                <h4 className="text-sm font-semibold">{title} {isActive && "(Actif)"}</h4>
             </div>
-            <p className="text-[11px] mb-2.5 opacity-90 leading-snug">{description}</p>
+            <p className="text-[10px] mb-2 opacity-90 leading-snug line-clamp-2">{description}</p>
             <Button 
                 onClick={onClick} 
                 size="sm" 
                 className={cn(
-                    "bg-white/90 hover:bg-white text-black text-[11px] rounded-full px-3 py-1 h-auto shadow-md",
+                    "bg-white/90 hover:bg-white text-black text-[10px] rounded-full px-2.5 py-0.5 h-auto shadow-md",
                     isActive && "bg-green-400/90 hover:bg-green-400 text-white",
                     isManagement && isActive && "bg-orange-500/90 hover:bg-orange-500 text-white" 
                 )}
             >
-                {buttonText} {!isActive && <ChevronRight size={12} className="ml-1" />}
+                {buttonText} {!isActive && <ChevronRight size={10} className="ml-0.5" />}
             </Button>
         </motion.div>
     );
 
 
     const ProfilePage = () => {
+      // Bloquer le scroll pour cette page
+      useScrollLock(true);
+      
       const { toast } = useToast();
       const { currentUser, updatePremiumStatus } = useUser();
       const navigate = useNavigate();
@@ -76,24 +80,24 @@ import React from 'react';
       };
 
       return (
-        <div className="h-screen flex flex-col p-1 pt-4 space-y-3 bg-gradient-to-b from-background to-slate-900 text-white overflow-y-auto no-scrollbar pb-20">
+        <div className="min-h-screen flex flex-col p-1 pt-4 space-y-3 bg-gradient-to-b from-background to-slate-900 text-white">
           <motion.div 
             initial={{ opacity: 0, y: -15 }} 
             animate={{ opacity: 1, y: 0 }} 
             transition={{ duration: 0.3 }} 
-            className="relative flex flex-col items-center flex-shrink-0"
+            className="relative flex flex-col items-center flex-shrink-0 pb-2"
           >
             <button onClick={handleProfilePictureClick} className="relative focus:outline-none group">
-                <Avatar className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 border-[6px] border-primary shadow-xl group-hover:border-pink-500 transition-all duration-300"> 
+                <Avatar className="w-28 h-28 sm:w-32 sm:h-32 border-4 border-primary shadow-xl group-hover:border-pink-500 transition-all duration-300"> 
                     <AvatarImage src={currentUser.profilePicture || `https://ui-avatars.com/api/?name=${userFirstName}&background=random`} alt={userFirstName} /> 
                     <AvatarFallback className="bg-primary-hover text-3xl sm:text-4xl">{userFirstName.substring(0,1).toUpperCase()}</AvatarFallback> 
                 </Avatar>
-                <div className="absolute bottom-1 right-1 bg-slate-700 p-2 rounded-full border-2 border-background group-hover:bg-pink-500 transition-all duration-300">
-                    <Edit3 size={14} className="text-primary group-hover:text-white transition-all duration-300" />
+                <div className="absolute bottom-0 right-0 bg-slate-700 p-1.5 rounded-full border-2 border-background group-hover:bg-pink-500 transition-all duration-300">
+                    <Edit3 size={12} className="text-primary group-hover:text-white transition-all duration-300" />
                 </div>
             </button>
-            <h3 className="mt-3 text-xl sm:text-2xl font-bold text-gradient-heresse">{userFirstName}</h3>
-            <p className="text-xs text-gray-400 max-w-[85%] text-center line-clamp-2">{currentUser.bio || "Aucune bio pour le moment."}</p>
+            <h3 className="mt-2 text-lg sm:text-xl font-bold text-gradient-heresse">{userFirstName}</h3>
+            <p className="text-[10px] text-gray-400 max-w-[85%] text-center line-clamp-1">{currentUser.bio || "Aucune bio pour le moment."}</p>
           </motion.div>
 
           <div className="grid grid-cols-4 gap-2 px-2 flex-shrink-0">
@@ -109,7 +113,7 @@ import React from 'react';
             <ActionButton icon={Settings} label="Paramètres" onClick={() => navigate('/settings')} />
           </div>
           
-          <div className="px-2 space-y-2.5 pt-2 flex-1">
+          <div className="px-2 space-y-2 pt-1 flex-1 overflow-hidden flex flex-col pb-20">
             <PremiumBanner 
                 title="Mode Incognito"
                 description="Soyez visible uniquement par les profils que vous avez préalablement likés."

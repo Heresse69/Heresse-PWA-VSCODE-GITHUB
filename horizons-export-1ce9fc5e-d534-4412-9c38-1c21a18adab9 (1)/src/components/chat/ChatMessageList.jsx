@@ -9,7 +9,15 @@ import React, { useRef, useEffect } from 'react';
       }, [messages]);
 
       return (
-        <div className="flex-grow p-4 space-y-4 overflow-y-auto">
+        <div 
+          className="flex-1 p-4 space-y-4 overflow-y-auto chat-messages scrollable"
+          data-scrollable="true"
+          style={{
+            overflowY: 'scroll',
+            WebkitOverflowScrolling: 'touch',
+            height: 'auto'
+          }}
+        >
           {messages.map((msg, index) => (
             <ChatMessageItem 
               key={msg.id || index} 

@@ -13,6 +13,7 @@ import { useUser } from '@/contexts/UserContext';
 import { getMatches, getConversations } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
 import StoriesSection from '@/components/StoriesSection';
+import { applyPWAScrollFix } from '@/utils/pwaScrollFix';
 
 // Composant MatchCard pour afficher chaque profil de match
 const MatchCard = ({ profile, index, conversationId }) => {
@@ -91,6 +92,16 @@ const MatchesPage = () => {
       };
     });
     setMatchedProfilesList(enrichedMatches);
+  }, []);
+
+  // Appliquer le fix PWA spécifiquement pour cette page
+  useEffect(() => {
+    // Délai pour s'assurer que le DOM est monté
+    const timer = setTimeout(() => {
+      applyPWAScrollFix();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
@@ -216,17 +227,15 @@ const MatchesPage = () => {
           initialIndex={currentStoryIndex}
           onClose={closeStoryViewer}
         />
-      )}
-
-      <div 
-  className="flex-1 overflow-y-auto px-4 pb-20"
-  style={{
-    overflowY: 'scroll',
-    WebkitOverflowScrolling: 'touch',
-    height: 'auto',
-    maxHeight: '400px'
-  }}
->
+      )}        <div 
+          className="flex-1 overflow-y-auto px-4 pb-20 matches-container"
+          data-scrollable="true"
+          style={{
+            overflowY: 'scroll',
+            WebkitOverflowScrolling: 'touch',
+            height: 'auto'
+          }}
+        >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">
             Vos matchs ({sortedProfiles.length})

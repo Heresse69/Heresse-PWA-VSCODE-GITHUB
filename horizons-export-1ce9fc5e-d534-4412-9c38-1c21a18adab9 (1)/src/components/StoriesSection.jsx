@@ -122,7 +122,7 @@ const StoriesSection = ({ usersList = [], currentUser, onStoryClick, onStoriesRe
 
   return (
     <div className="pb-4">
-      <div className="flex space-x-2 overflow-x-auto scrollbar-hide" style={{
+      <div className="flex space-x-2 overflow-x-auto scrollbar-hide story-container" data-scrollable="true" style={{
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
         WebkitOverflowScrolling: 'touch'

@@ -19,6 +19,7 @@ import MediaPaymentModal from '@/components/chat/MediaPaymentModal';
 import MediaRatingModal from '@/components/chat/MediaRatingModal';
 import SendMediaModal from '@/components/chat/SendMediaModal';
 import { useToast } from '@/components/ui/use-toast';
+import { applyPWAScrollFix } from '@/utils/pwaScrollFix';
 import { useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
 
@@ -152,6 +153,16 @@ const ChatPage = () => {
       setDisplayableStories(sortedStories);
     }
   }, [currentUser, allStoriesFromContext, conversationsList]);
+
+  // Appliquer le fix PWA spécifiquement pour cette page
+  useEffect(() => {
+    // Délai pour s'assurer que le DOM est monté
+    const timer = setTimeout(() => {
+      applyPWAScrollFix();
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const openStoryViewer = (storyIndex) => {
     setCurrentStoryIndex(storyIndex);
@@ -428,7 +439,14 @@ const ChatPage = () => {
         </div>
       </div>      {/* Section scrollable - Liste des conversations */}
       <div className="flex-1 min-h-0 overflow-hidden">
-        <div className="h-full px-3 pb-20 overflow-y-auto overflow-x-hidden mobile-scroll prevent-bounce">
+        <div 
+          className="flex-1 px-3 pb-20 overflow-y-auto overflow-x-hidden mobile-scroll prevent-bounce"
+          style={{
+            overflowY: 'scroll',
+            WebkitOverflowScrolling: 'touch',
+            height: 'auto'
+          }}
+        >
           {isStoryViewerOpen && (
             <StoryViewer
               stories={displayableStories}

@@ -13,21 +13,19 @@ const PWAWrapper = ({ children }) => {
       const body = document.body;
       const html = document.documentElement;
       
-      // Styles pour le body
+      // Styles pour le body - PERMETTRE LE SCROLL
       body.style.height = '100vh';
       body.style.height = '-webkit-fill-available';
-      body.style.overflow = 'hidden';
-      body.style.position = 'fixed';
+      // IMPORTANT: Ne pas mettre overflow: hidden pour le scroll
+      body.style.position = 'relative'; // Pas fixed pour permettre le scroll
       body.style.width = '100%';
-      body.style.top = '0';
-      body.style.left = '0';
       body.style.overscrollBehavior = 'none';
-      body.style.touchAction = 'manipulation';
+      body.style.touchAction = 'pan-y'; // Permettre le scroll vertical
       body.style.webkitOverflowScrolling = 'touch';
       
-      // Styles pour le html
+      // Styles pour le html - PERMETTRE LE SCROLL
       html.style.height = '100%';
-      html.style.overflow = 'hidden';
+      // IMPORTANT: Ne pas mettre overflow: hidden
       html.style.overscrollBehavior = 'none';
       
       // Forcer le viewport et éviter le zoom
@@ -41,10 +39,26 @@ const PWAWrapper = ({ children }) => {
         document.head.appendChild(viewport);
       }
       
-      // Empêcher le bounce effect sur iOS
+      // Empêcher seulement le zoom pinch, permettre TOUT le scroll
+      document.addEventListener('touchstart', (e) => {
+        // Seulement empêcher les gestes multi-touch (zoom)
+        if (e.touches && e.touches.length > 1) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+      
+      // Empêcher seulement le pull-to-refresh au niveau global
       document.addEventListener('touchmove', (e) => {
-        if (e.target.closest('.scrollable')) return; // Permettre le scroll dans les zones autorisées
-        e.preventDefault();
+        // Ne pas empêcher le scroll dans les containers scrollables
+        const scrollableElement = e.target.closest('.matches-container, .chat-messages, [data-scrollable="true"], .overflow-y-auto');
+        if (scrollableElement) {
+          return; // Laisser le scroll se faire naturellement
+        }
+        
+        // Empêcher seulement le pull-to-refresh si on est en haut de page et qu'on tire vers le bas
+        if (window.scrollY === 0 && e.touches[0] && e.touches[0].clientY > e.touches[0].startY) {
+          e.preventDefault();
+        }
       }, { passive: false });
       
       console.log('[PWA] Mode standalone détecté et configuré');
@@ -57,17 +71,17 @@ const PWAWrapper = ({ children }) => {
         const html = document.documentElement;
         
         body.style.height = '';
-        body.style.overflow = '';
+        // body.style.overflow = ''; // Pas défini
         body.style.position = '';
         body.style.width = '';
-        body.style.top = '';
-        body.style.left = '';
+        // body.style.top = ''; // Pas défini
+        // body.style.left = ''; // Pas défini
         body.style.overscrollBehavior = '';
         body.style.touchAction = '';
         body.style.webkitOverflowScrolling = '';
         
-        html.style.height = '';
-        html.style.overflow = '';
+        // html.style.height = ''; // Pas défini
+        // html.style.overflow = ''; // Pas défini
         html.style.overscrollBehavior = '';
         
         console.log('[PWA] Configuration nettoyée');

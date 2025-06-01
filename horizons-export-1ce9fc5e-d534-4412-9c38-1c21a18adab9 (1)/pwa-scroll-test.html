@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Test PWA Scroll - Diagnostic</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #2a2a2a;
+            padding: 20px;
+            text-align: center;
+            z-index: 100;
+            border-bottom: 1px solid #333;
+        }
+        
+        .content {
+            margin-top: 80px;
+            padding: 20px;
+            height: calc(100vh - 160px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #333;
+            border-radius: 10px;
+        }
+        
+        .scroll-container {
+            height: 300px;
+            overflow-y: auto;
+            background: #444;
+            border: 2px solid #666;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .scroll-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: #555;
+            border-radius: 6px;
+            border-left: 4px solid #0066cc;
+        }
+        
+        .horizontal-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 10px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .horizontal-item {
+            flex: none;
+            width: 200px;
+            height: 100px;
+            background: #666;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        
+        .status {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #2a2a2a;
+            padding: 15px;
+            border-top: 1px solid #333;
+            font-size: 14px;
+        }
+        
+        .status-item {
+            margin: 5px 0;
+            padding: 5px 10px;
+            background: #444;
+            border-radius: 4px;
+        }
+        
+        .success { background-color: #22c55e !important; }
+        .warning { background-color: #f59e0b !important; }
+        .error { background-color: #ef4444 !important; }
+        
+        @media (display-mode: standalone) {
+            .pwa-only {
+                display: block !important;
+                background-color: #22c55e;
+            }
+            
+            /* Appliquer les mêmes fixes que dans pwaScrollFix.js */
+            .scroll-container {
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                overscroll-behavior: contain !important;
+                touch-action: pan-y !important;
+            }
+            
+            .horizontal-scroll {
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                touch-action: pan-x !important;
+            }
+        }
+        
+        .pwa-only {
+            display: none;
+            padding: 10px;
+            background-color: #ef4444;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 Test PWA Scroll Diagnostic</h1>
+        <p>Comparaison Safari vs PWA</p>
+    </div>
+    
+    <div class="content">
+        <div class="pwa-only">
+            ✅ MODE PWA DÉTECTÉ - Test des corrections de scroll
+        </div>
+        
+        <div class="test-section">
+            <h2>📱 Test 1: Scroll Vertical (Matches/Chat)</h2>
+            <p>Ce conteneur simule la liste des matches ou conversations</p>
+            <div class="scroll-container" id="vertical-scroll">
+                <div class="scroll-item">📄 Match 1 - Alice, 25 ans</div>
+                <div class="scroll-item">📄 Match 2 - Sophie, 28 ans</div>
+                <div class="scroll-item">📄 Match 3 - Emma, 24 ans</div>
+                <div class="scroll-item">📄 Match 4 - Léa, 26 ans</div>
+                <div class="scroll-item">📄 Match 5 - Marie, 29 ans</div>
+                <div class="scroll-item">📄 Match 6 - Julie, 23 ans</div>
+                <div class="scroll-item">📄 Match 7 - Sarah, 27 ans</div>
+                <div class="scroll-item">📄 Match 8 - Claire, 25 ans</div>
+                <div class="scroll-item">📄 Match 9 - Lisa, 24 ans</div>
+                <div class="scroll-item">📄 Match 10 - Anne, 30 ans</div>
+                <div class="scroll-item">📄 Match 11 - Nina, 22 ans</div>
+                <div class="scroll-item">📄 Match 12 - Eva, 26 ans</div>
+                <div class="scroll-item">📄 Match 13 - Lou, 25 ans</div>
+                <div class="scroll-item">📄 Match 14 - Jade, 24 ans</div>
+                <div class="scroll-item">📄 Match 15 - Iris, 28 ans</div>
+            </div>
+            <p><strong>Test:</strong> Peut-on faire défiler cette liste vers le haut/bas ?</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>📚 Test 2: Scroll Horizontal (Stories)</h2>
+            <p>Ce conteneur simule le scroll horizontal des stories</p>
+            <div class="horizontal-scroll" id="horizontal-scroll">
+                <div class="horizontal-item">Story 1</div>
+                <div class="horizontal-item">Story 2</div>
+                <div class="horizontal-item">Story 3</div>
+                <div class="horizontal-item">Story 4</div>
+                <div class="horizontal-item">Story 5</div>
+                <div class="horizontal-item">Story 6</div>
+                <div class="horizontal-item">Story 7</div>
+                <div class="horizontal-item">Story 8</div>
+            </div>
+            <p><strong>Test:</strong> Peut-on faire défiler cette liste vers la gauche/droite ?</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔧 Test 3: Scroll de la page principale</h2>
+            <p>Ce contenu teste le scroll de la page entière</p>
+            <div style="height: 500px; background: linear-gradient(45deg, #333, #666); border-radius: 10px; padding: 20px;">
+                <h3>Contenu de remplissage</h3>
+                <p style="margin: 20px 0;">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                <p style="margin: 20px 0;">Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</p>
+                <p style="margin: 20px 0;">Ut enim ad minim veniam, quis nostrud exercitation...</p>
+                <p style="margin: 20px 0;">Duis aute irure dolor in reprehenderit in voluptate...</p>
+                <p style="margin: 20px 0;">Excepteur sint occaecat cupidatat non proident...</p>
+                <p style="margin: 20px 0;">Sunt in culpa qui officia deserunt mollit anim...</p>
+                <p style="margin: 20px 0;">Fin du contenu de test</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="status" id="status">
+        <div class="status-item" id="mode-status">🔍 Détection du mode...</div>
+        <div class="status-item" id="scroll-status">⏳ Test du scroll en cours...</div>
+        <div class="status-item" id="touch-status">👆 Test du touch en cours...</div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modeStatus = document.getElementById('mode-status');
+            const scrollStatus = document.getElementById('scroll-status');
+            const touchStatus = document.getElementById('touch-status');
+            
+            // Détecter le mode PWA
+            const isPWA = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+            const isIOSPWA = (window.navigator.standalone === true);
+            
+            if (isPWA || isIOSPWA) {
+                modeStatus.innerHTML = '✅ MODE PWA DÉTECTÉ';
+                modeStatus.className = 'status-item success';
+            } else {
+                modeStatus.innerHTML = '🌐 MODE SAFARI/NAVIGATEUR';
+                modeStatus.className = 'status-item warning';
+            }
+            
+            // Tester les capabilities de scroll
+            let verticalScrollTest = false;
+            let horizontalScrollTest = false;
+            
+            const verticalContainer = document.getElementById('vertical-scroll');
+            const horizontalContainer = document.getElementById('horizontal-scroll');
+            
+            // Test de scroll vertical
+            verticalContainer.addEventListener('scroll', function() {
+                verticalScrollTest = true;
+                updateScrollStatus();
+            });
+            
+            // Test de scroll horizontal  
+            horizontalContainer.addEventListener('scroll', function() {
+                horizontalScrollTest = true;
+                updateScrollStatus();
+            });
+            
+            function updateScrollStatus() {
+                let status = [];
+                if (verticalScrollTest) status.push('✅ Vertical');
+                if (horizontalScrollTest) status.push('✅ Horizontal');
+                
+                if (status.length === 0) {
+                    scrollStatus.innerHTML = '❌ Aucun scroll détecté';
+                    scrollStatus.className = 'status-item error';
+                } else if (status.length === 2) {
+                    scrollStatus.innerHTML = '✅ Tous les scrolls fonctionnent: ' + status.join(', ');
+                    scrollStatus.className = 'status-item success';
+                } else {
+                    scrollStatus.innerHTML = '⚠️ Scroll partiel: ' + status.join(', ');
+                    scrollStatus.className = 'status-item warning';
+                }
+            }
+            
+            // Test des événements touch
+            let touchEvents = [];
+            
+            document.addEventListener('touchstart', function(e) {
+                touchEvents.push('touchstart');
+                updateTouchStatus();
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                touchEvents.push('touchmove');
+                updateTouchStatus();
+            });
+            
+            function updateTouchStatus() {
+                const uniqueEvents = [...new Set(touchEvents)];
+                if (uniqueEvents.length > 0) {
+                    touchStatus.innerHTML = '✅ Touch events: ' + uniqueEvents.join(', ');
+                    touchStatus.className = 'status-item success';
+                }
+            }
+            
+            // Diagnostic avancé PWA
+            setTimeout(function() {
+                console.log('=== DIAGNOSTIC PWA SCROLL ===');
+                console.log('Mode PWA:', isPWA || isIOSPWA);
+                console.log('User Agent:', navigator.userAgent);
+                console.log('Display Mode:', window.matchMedia('(display-mode: standalone)').matches);
+                console.log('iOS Standalone:', window.navigator.standalone);
+                console.log('Screen:', {
+                    width: screen.width,
+                    height: screen.height,
+                    availWidth: screen.availWidth,
+                    availHeight: screen.availHeight
+                });
+                console.log('Viewport:', {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                });
+                
+                // Test des styles appliqués
+                const verticalStyles = window.getComputedStyle(verticalContainer);
+                const horizontalStyles = window.getComputedStyle(horizontalContainer);
+                
+                console.log('Styles Vertical Container:', {
+                    overflowY: verticalStyles.overflowY,
+                    webkitOverflowScrolling: verticalStyles.webkitOverflowScrolling,
+                    touchAction: verticalStyles.touchAction,
+                    overscrollBehavior: verticalStyles.overscrollBehavior
+                });
+                
+                console.log('Styles Horizontal Container:', {
+                    overflowX: horizontalStyles.overflowX,
+                    overflowY: horizontalStyles.overflowY,
+                    webkitOverflowScrolling: horizontalStyles.webkitOverflowScrolling,
+                    touchAction: horizontalStyles.touchAction
+                });
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

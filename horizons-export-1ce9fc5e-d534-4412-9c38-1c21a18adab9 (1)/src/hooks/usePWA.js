@@ -11,29 +11,51 @@ export const usePWA = () => {
       setIsPWA(isPWAMode);
       
       if (isPWAMode) {
-        // Appliquer les styles PWA globalement
+        // Appliquer les styles PWA globalement mais permettre le scroll
         document.body.style.overscrollBehavior = 'none';
-        document.body.style.touchAction = 'manipulation';
+        document.body.style.touchAction = 'pan-y'; // Permettre le scroll vertical
         document.body.style.userSelect = 'none';
         document.body.style.webkitUserSelect = 'none';
         document.body.style.webkitTouchCallout = 'none';
         document.body.style.height = '100vh';
         document.body.style.height = '-webkit-fill-available';
-        document.body.style.overflow = 'hidden';
+        // IMPORTANT: Ne pas mettre overflow: hidden pour permettre le scroll
         
-        // Empêcher le pull-to-refresh et le zoom
-        const preventBehaviors = (e) => {
-          if (e.touches.length > 1) {
+        // Forcer les corrections PWA après un délai pour s'assurer que les éléments sont montés
+        setTimeout(() => {
+          // Forcer le scroll sur tous les containers critiques
+          const scrollableContainers = [
+            '.matches-container',
+            '.chat-messages', 
+            '.flex-1.overflow-y-auto',
+            '[data-scrollable="true"]'
+          ];
+          
+          scrollableContainers.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+              el.style.overflowY = 'auto';
+              el.style.webkitOverflowScrolling = 'touch';
+              el.style.overscrollBehavior = 'contain';
+              el.style.touchAction = 'pan-y';
+              el.style.height = 'auto';
+              el.style.maxHeight = 'none';
+            });
+          });
+        }, 100);
+        
+        // Empêcher seulement le zoom pinch, pas le scroll
+        const preventPinchZoom = (e) => {
+          // Seulement empêcher les gestes multi-touch (zoom)
+          if (e.touches && e.touches.length > 1) {
             e.preventDefault();
           }
         };
         
-        document.addEventListener('touchmove', preventBehaviors, { passive: false });
-        document.addEventListener('touchstart', preventBehaviors, { passive: false });
+        document.addEventListener('touchstart', preventPinchZoom, { passive: false });
         
         return () => {
-          document.removeEventListener('touchmove', preventBehaviors);
-          document.removeEventListener('touchstart', preventBehaviors);
+          document.removeEventListener('touchstart', preventPinchZoom);
         };
       }
     };
@@ -53,7 +75,7 @@ export const usePWA = () => {
         document.body.style.webkitUserSelect = '';
         document.body.style.webkitTouchCallout = '';
         document.body.style.height = '';
-        document.body.style.overflow = '';
+        // Pas de nettoyage de overflow car on ne l'a pas mis
       }
     };
   }, []);
@@ -63,7 +85,7 @@ export const usePWA = () => {
       height: '100vh',
       height: '-webkit-fill-available',
       overscrollBehavior: 'none',
-      touchAction: 'manipulation',
+      touchAction: 'pan-y', // Permettre le scroll vertical
       position: 'relative'
     } : {};
   };

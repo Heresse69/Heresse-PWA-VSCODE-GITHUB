@@ -59,6 +59,7 @@ const MainLayout = ({ onLogout, isAuthenticated, isKycComplete }) => {
   
   const isChatPageActive = location.pathname.startsWith('/chat/'); 
   const isChatListPage = location.pathname === '/chat'; 
+  const isMatchesPage = location.pathname === '/matches';
   const isProfilePageActive = location.pathname === '/profile' && !location.pathname.startsWith('/profile/');
   const isMyPhotosPage = location.pathname === '/profile/my-photos';
   const isUserPrivateGalleryPage = location.pathname.includes('/gallery/') && location.pathname.startsWith('/profile/'); 
@@ -146,14 +147,14 @@ const MainLayout = ({ onLogout, isAuthenticated, isKycComplete }) => {
   const mainContentPaddingBottom = showNav ? 'pb-[calc(56px+env(safe-area-inset-bottom))]' : 'pb-0'; 
   const mainContentPaddingTop = showHeader ? `pt-[calc(3.5rem+env(safe-area-inset-top))]` : 'pt-0';
   
-const mainContentOverflow = (isHomePage || isViewStoryPage || isChatPageActive || isKycPage) ? 'overflow-hidden' : 'overflow-y-auto';  
+const mainContentOverflow = (isHomePage || isProfilePageActive || isViewStoryPage || isChatPageActive || isKycPage || isMatchesPage || isChatListPage) ? 'overflow-hidden' : 'overflow-y-auto';  
   const headerHeight = `calc(3.5rem + env(safe-area-inset-top))`;
 
   return (
     <div className="flex flex-col h-full bg-background text-foreground" style={{ overscrollBehavior: 'none', WebkitOverflowScrolling: 'auto' }}>
       {showHeader && (
         <header 
-          className="p-2.5 flex items-center justify-between bg-background/80 backdrop-blur-sm z-20 border-b border-border fixed top-0 left-0 right-0 max-w-md mx-auto"
+          className="p-2.5 flex items-center justify-between bg-background z-20 border-b border-border fixed top-0 left-0 right-0 max-w-md mx-auto"
           style={{ 
             paddingTop: `calc(0.625rem + env(safe-area-inset-top))`,
             height: headerHeight,
@@ -189,7 +190,8 @@ const mainContentOverflow = (isHomePage || isViewStoryPage || isChatPageActive |
       )}
       
       <main 
-        className={`flex-grow ${mainContentOverflow} ${mainContentPaddingBottom} ${mainContentPaddingTop}`}
+        className={`flex-grow main-content ${mainContentOverflow} ${mainContentPaddingBottom} ${mainContentPaddingTop}`}
+        data-scrollable="true"
       >
   <motion.div
   key={location.pathname}
