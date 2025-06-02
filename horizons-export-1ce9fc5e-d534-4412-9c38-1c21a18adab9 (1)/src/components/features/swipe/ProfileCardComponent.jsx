@@ -62,30 +62,30 @@ import React, { useState } from 'react';
               ))}
             </div>
             
-            <div className="absolute bottom-0 left-0 right-0 p-2 pt-6 sm:p-3 sm:pt-10 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-white pointer-events-none">
+            <div className="absolute bottom-0 left-0 right-0 p-2 pt-15 sm:p-3 sm:pt-10 bg-gradient-to-t from-black/100 via-black/80 to-transparent text-white pointer-events-none">
               <div className="flex items-center justify-between mb-1 flex-wrap gap-1">
                 <Link 
                   to={`/profile/${profile.id}`} 
                   onClick={(e) => { e.stopPropagation(); if (onSwipe) onSwipe('info'); }}
                   className="pointer-events-auto focus:outline-none focus:ring-2 focus:ring-primary rounded"
                 >
-                  <h2 className="text-xl sm:text-2xl font-bold drop-shadow-md">{profile.name} <span className="font-light text-lg sm:text-xl">{profile.age}</span></h2>
+                  <h2 className="text-2xl sm:text-3xl font-bold drop-shadow-md">{profile.name} <span className="font-light text-xl sm:text-2xl">{profile.age}</span></h2>
                 </Link>
               </div>
               <div className="flex items-center text-xs text-gray-300 mb-1 drop-shadow-sm flex-wrap gap-1">
-                  <MapPin size={14} className="mr-1.5" /> {profile.city} ({profile.distance})
+                  <MapPin size={18} className="mr-1.5" /> {profile.city} ({profile.distance})
               </div>
               {currentPhotoIndex === profile.referencePhotoIndex && 
                   <Badge variant="secondary" className="mb-1 bg-gradient-to-r from-green-500/80 to-emerald-600/80 text-white text-[9px] px-2 py-1 shadow-md backdrop-blur-sm border-none inline-flex items-center w-fit rounded-full">
-                      <ShieldCheck size={10} className="mr-1"/>Photo Vérifiée
+                      <ShieldCheck size={14} className="mr-1"/>Photo Vérifiée
                   </Badge>
               }
               {averageRating > 0 && (
                   <div className="flex items-center text-xs text-gray-300 mb-1 drop-shadow-sm">
-                      <StarIcon size={12} className="mr-1 fill-yellow-400 text-yellow-400"/> {averageRating.toFixed(1)} <span className="ml-1">Moyenne des médias</span>
+                      <StarIcon size={16} className="mr-1 fill-yellow-400 text-yellow-400"/> {averageRating.toFixed(1)} <span className="ml-1">Moyenne des médias</span>
                   </div>
               )}
-              <p className="text-xs text-gray-200 line-clamp-2 leading-relaxed drop-shadow-sm">{profile.bio}</p>
+              <p className="text-sm text-gray-200 line-clamp-2 leading-relaxed drop-shadow-sm">{profile.bio}</p>
             </div>
           </CardHeader>
         </Card>

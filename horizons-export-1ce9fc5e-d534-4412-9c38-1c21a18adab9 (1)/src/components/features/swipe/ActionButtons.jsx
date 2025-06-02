@@ -59,16 +59,20 @@ const ActionButtons = ({ onRewind, onSwipe, canRewind, isSwiping, historyLength,
   };
 
   const handleLike = () => {
-    if (isSwiping) return; // Prevent double-clicks during swipe
-    // Déclencher l'animation de swipe vers la droite
+  if (isSwiping) return; // Prevent double-clicks during swipe
+  // Déclencher l'animation de swipe vers la droite avec délai
+  setTimeout(() => {
     onSwipe('right');
-  };
+  }, 50);
+};
 
-  const handleDislike = () => {
-    if (isSwiping) return; // Prevent double-clicks during swipe
-    // Déclencher l'animation de swipe vers la gauche
+const handleDislike = () => {
+  if (isSwiping) return; // Prevent double-clicks during swipe
+  // Déclencher l'animation de swipe vers la gauche avec délai
+  setTimeout(() => {
     onSwipe('left');
-  };
+  }, 50);
+};
 
   const handleToggleIncognito = () => {
     if (isIncognito) {
@@ -153,7 +157,7 @@ const ActionButtons = ({ onRewind, onSwipe, canRewind, isSwiping, historyLength,
               }}
               className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-none text-sm py-2"
             >
-              Premium
+              Souscrire
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -165,7 +169,7 @@ const ActionButtons = ({ onRewind, onSwipe, canRewind, isSwiping, historyLength,
           <DialogHeader>
             <DialogTitle className="text-center text-lg font-bold">Désactiver Incognito</DialogTitle>
             <DialogDescription className="text-center text-gray-300 text-sm">
-              Êtes-vous sûr(e) de vouloir désactiver le mode incognito ?
+              Êtes-vous sûr(e) de vouloir désactiver le mode incognito ? Tout les utilisateurs pourront voir votre profil
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 mt-3">
@@ -173,7 +177,7 @@ const ActionButtons = ({ onRewind, onSwipe, canRewind, isSwiping, historyLength,
               onClick={() => confirmDisableIncognito(false)}
               className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-sm py-2"
             >
-              Non
+              Annuler
             </Button>
             <Button 
               onClick={() => confirmDisableIncognito(true)} 

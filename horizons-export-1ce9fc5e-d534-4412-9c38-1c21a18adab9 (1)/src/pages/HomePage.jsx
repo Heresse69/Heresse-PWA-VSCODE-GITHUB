@@ -44,6 +44,7 @@ const HomePage = () => {
     isMounted.current = true;
     return () => { isMounted.current = false; };
   }, []);
+  
 
   const handleDragStart = () => {
     if (!isMounted.current) return;
@@ -119,59 +120,74 @@ const HomePage = () => {
     }
   }, [topCardControls, removeTopCard, isMounted, motionX, motionY]); 
 
-  const triggerSwipe = useCallback((direction) => {
-    if (!isMounted.current || profiles.length === 0 || currentIndex >= profiles.length) return;
-    let targetX = 0;
-    let targetY = 0;
-    let finalRotate = 0;
-    let swipeDirection = direction;
-
-    if (direction === 'left') { 
-      targetX = "-150%"; 
-      finalRotate = -25; 
-    }
-    else if (direction === 'right') { 
-      targetX = "150%"; 
-      finalRotate = 25; 
-    }
-    else if (direction === 'superlike') { 
-      targetY = "-150%"; 
-      finalRotate = 0; 
-    } 
-    else if (direction === 'info') {
-      navigate(`/profile/${profiles[currentIndex].id}`);
-      return;
-    }
+const triggerSwipe = useCallback((direction) => {
+  if (!isMounted.current || profiles.length === 0 || currentIndex >= profiles.length) return;
+  
+  if (direction === 'info') {
+    navigate(`/profile/${profiles[currentIndex].id}`);
+    return;
+  }
+  
+  setIsSwiping(true);
+  
+  // Animation en 2 étapes pour un effet plus fluide
+  if (direction === 'left' || direction === 'right') {
+    const finalX = direction === 'right' ? "120%" : "-120%";
+    const finalRotate = direction === 'right' ? 20 : -20;
     
-    setIsSwiping(true); 
-    
-    // Animation de swipe déclenchée par les boutons
-    if (direction === 'superlike') {
-      topCardControls.start({ 
-        y: targetY, 
-        opacity: 0, 
-        scale: 1.1, 
-        transition: { duration: 0.4, ease: "circOut" } 
-      }).then(() => { 
-        if(isMounted.current) {
-          removeTopCard(swipeDirection);
-          setIsSwiping(false);
-        }
-      });
-    } else {
-      topCardControls.start({ 
-        x: targetX, 
-        opacity: 0, 
-        rotate: finalRotate, 
-        transition: { duration: 0.4, ease: "easeOut" } 
-      }).then(() => { 
-        if(isMounted.current) {
-          removeTopCard(swipeDirection);
-          setIsSwiping(false);
-        }
-      });
-    }
-  }, [topCardControls, currentIndex, profiles, removeTopCard, navigate, isMounted]);
+    // Étape 1: Légère inclinaison et petit mouvement (0.08s)
+    topCardControls.start({
+      x: direction === 'right' ? 30 : -30,
+      rotate: direction === 'right' ? 8 : -8,
+      transition: { 
+        duration: 0.16, 
+        ease: "easeOut" 
+      }
+    }).then(() => {
+      // Étape 2: Glissement complet (0.12s)
+      if (isMounted.current) {
+        topCardControls.start({
+          x: finalX,
+          y: 20, // Légère descente pour plus de réalisme
+          rotate: finalRotate,
+          opacity: 0,
+          scale: 0.95,
+          transition: { 
+            duration: 0.24, 
+            ease: "easeIn" 
+          }
+        }).then(() => {
+          if (isMounted.current) {
+            removeTopCard(direction);
+            setIsSwiping(false);
+          }
+        });
+      }
+    });
+  } 
+  else if (direction === 'superlike') {
+    // Animation vers le haut pour superlike
+    topCardControls.start({
+      y: -10,
+      scale: 1.05,
+      transition: { duration: 0.25, ease: "easeOut" }
+    }).then(() => {
+      if (isMounted.current) {
+        topCardControls.start({
+          y: "-120%",
+          opacity: 0,
+          scale: 1.2,
+          transition: { duration: 0.34, ease: "easeIn" }
+        }).then(() => {
+          if (isMounted.current) {
+            removeTopCard('superlike');
+            setIsSwiping(false);
+          }
+        });
+      }
+    });
+  }
+}, [topCardControls, currentIndex, profiles, removeTopCard, navigate, isMounted]);
 
   const handleRewind = () => {
     if (!currentUser || !currentUser.premiumStatus.canRewind || history.length === 0) {
@@ -255,7 +271,7 @@ const HomePage = () => {
         <div className={`w-full max-w-md ${isPWA ? 'aspect-[3/4.5]' : 'aspect-[3/4]'} relative mx-auto px-2`}>
           <AnimatePresence>
             {/* Afficher jusqu'à 3 cartes en superposition */}
-            {profiles.slice(currentIndex, currentIndex + 3).map((profile, index) => {
+            {profiles.slice(currentIndex, currentIndex + 30).map((profile, index) => {
               if (!profile) return null;
               
               const isTopCard = index === 0;
