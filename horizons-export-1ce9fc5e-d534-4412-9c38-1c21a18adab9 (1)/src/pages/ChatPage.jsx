@@ -103,9 +103,13 @@ const ChatPage = () => {
     setAvailableStories(stories);
   };
 
-  const openStoryViewer = (storyIndex) => {
+  const openStoryViewer = (storyIndex, orderedStories = null) => {
     console.log('🎯 Tentative d\'ouverture story index:', storyIndex, 'Stories disponibles:', availableStories.length);
-    if (availableStories.length > 0) {
+    // Si on reçoit des stories ordonnées (nouveau format), on les utilise
+    if (orderedStories) {
+      setAvailableStories(orderedStories);
+    }
+    if ((orderedStories && orderedStories.length > 0) || availableStories.length > 0) {
       setCurrentStoryIndex(storyIndex);
       setIsStoryViewerOpen(true);
     } else {

@@ -62,7 +62,7 @@ import React, { useState } from 'react';
               ))}
             </div>
             
-            <div className="absolute bottom-0 left-0 right-0 p-2 pt-15 sm:p-3 sm:pt-10 bg-gradient-to-t from-black/100 via-black/80 to-transparent text-white pointer-events-none">
+            <div className="absolute bottom-0 left-0 right-0 p-2 pt-15 sm:p-3 sm:pt-10 pb-5 sm:pb-6 bg-gradient-to-t from-black/100 via-black/80 to-transparent text-white pointer-events-none">
               <div className="flex items-center justify-between mb-1 flex-wrap gap-1">
                 <Link 
                   to={`/profile/${profile.id}`} 

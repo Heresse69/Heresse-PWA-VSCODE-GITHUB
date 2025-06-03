@@ -30,24 +30,26 @@ const StoryBubble = ({ story, isOwnStory, isAddButton, onClick }) => {
           // Contour dégradé visible
           <div className="relative">
             <div 
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 animate-spin"
+              className="absolute inset-0 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 via-red-500 to-yellow-400 p-1"
               style={{
-                padding: '4px',
                 width: '94px',
                 height: '94px',
                 left: '-4px',
                 top: '-4px'
               }}
-            />
-            <Avatar 
-              className="border-0 relative bg-slate-900 rounded-full" 
-              style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px', zIndex: 10}}
             >
-              <AvatarImage src={story.url} alt={story.userName} />
-              <AvatarFallback className="bg-slate-600" style={{fontSize: '18px'}}>
-                {story.userName.substring(0, 1)}
-              </AvatarFallback>
-            </Avatar>
+              <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
+                <Avatar 
+                  className="border-0 relative" 
+                  style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px'}}
+                >
+                  <AvatarImage src={story.url} alt={story.userName} />
+                  <AvatarFallback className="bg-slate-600" style={{fontSize: '18px'}}>
+                    {story.userName.substring(0, 1)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            </div>
           </div>
         ) : (
           // Story personnelle sans contour
@@ -77,29 +79,74 @@ const StoryContainer = ({
 }) => {
   console.log('🚀 StoryContainer rendu avec', stories.length, 'stories');
 
-  const sortedStories = [...stories].sort((a, b) => {
-    const aIsOwn = a.isOwnStory || (currentUser && a.userId === currentUser.id);
-    const bIsOwn = b.isOwnStory || (currentUser && b.userId === currentUser.id);
-    
-    if (aIsOwn && !bIsOwn) return -1;
-    if (!aIsOwn && bIsOwn) return 1;
-    if (!a.seen && b.seen) return -1;
-    if (a.seen && !b.seen) return 1;
-    
+  // Grouper les stories par utilisateur
+  const storiesByUser = stories.reduce((acc, story) => {
+    const userId = story.userId;
+    if (!acc[userId]) {
+      acc[userId] = {
+        userId: userId,
+        userName: story.userName,
+        url: story.url, // Photo de profil de l'utilisateur
+        stories: [],
+        isOwnStory: story.isOwnStory || (currentUser && story.userId === currentUser.id),
+        hasUnseenStories: false
+      };
+    }
+    acc[userId].stories.push(story);
+    if (!story.seen) {
+      acc[userId].hasUnseenStories = true;
+    }
+    return acc;
+  }, {});
+
+  // Convertir en tableau et trier
+  const userStories = Object.values(storiesByUser).sort((a, b) => {
+    // Stories personnelles en premier
+    if (a.isOwnStory && !b.isOwnStory) return -1;
+    if (!a.isOwnStory && b.isOwnStory) return 1;
+    // Puis stories non vues
+    if (a.hasUnseenStories && !b.hasUnseenStories) return -1;
+    if (!a.hasUnseenStories && b.hasUnseenStories) return 1;
     return 0;
   });
+
+  // Nouvelle logique de navigation des stories par utilisateur
+  const handleUserStoryClick = (clickedUserIndex) => {
+    // Créer la liste ordonnée des utilisateurs à partir de l'utilisateur cliqué
+    const orderedUsers = [
+      ...userStories.slice(clickedUserIndex), // À partir de l'utilisateur cliqué
+      ...userStories.slice(0, clickedUserIndex) // Puis le reste dans l'ordre original
+    ];
+    
+    // Créer un tableau plat de toutes les stories dans l'ordre de navigation souhaité
+    const orderedStories = [];
+    orderedUsers.forEach(userStory => {
+      userStory.stories.forEach(story => {
+        orderedStories.push({
+          ...story,
+          userStoryData: userStory // Garder une référence aux données utilisateur
+        });
+      });
+    });
+
+    // Appeler onStoryClick avec l'index 0 car on commence toujours par la première story
+    // de l'utilisateur cliqué, et on passe les stories ordonnées
+    if (onStoryClick) {
+      onStoryClick(0, orderedStories);
+    }
+  };
 
   return (
     <div className={`mb-3 ${className}`}>
       <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories ✨ (MODIFIÉ)</h2>
-      <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+      <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar" style={{width: 'fit-content', minWidth: '100%'}}>
         <StoryBubble isAddButton={true} />
-        {sortedStories.map((story, index) => (
+        {userStories.map((userStory, index) => (
           <StoryBubble
-            key={story.id}
-            story={story}
-            isOwnStory={story.isOwnStory || (currentUser && story.userId === currentUser.id)}
-            onClick={() => onStoryClick(index)}
+            key={userStory.userId}
+            story={userStory}
+            isOwnStory={userStory.isOwnStory}
+            onClick={() => handleUserStoryClick(index)}
           />
         ))}
       </div>

@@ -20,7 +20,7 @@ export const initPWAHack = () => {
         root.style.overflow = 'hidden';
       }
       
-      // Force la TabBar en bas
+      // Force la TabBar en bas - SANS SAFE AREA
       setTimeout(() => {
         const nav = document.querySelector('nav');
         if (nav) {
@@ -28,7 +28,8 @@ export const initPWAHack = () => {
           nav.style.bottom = '0px';
           nav.style.zIndex = '9999';
           nav.style.width = '100vw';
-          console.log('✅ TabBar forcée en position');
+          nav.style.paddingBottom = '0';
+          console.log('✅ TabBar forcée en position bottom: 0');
         }
       }, 100);
     };

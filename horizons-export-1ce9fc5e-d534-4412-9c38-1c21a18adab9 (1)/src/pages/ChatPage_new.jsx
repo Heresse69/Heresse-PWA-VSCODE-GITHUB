@@ -164,7 +164,11 @@ const ChatPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const openStoryViewer = (storyIndex) => {
+  const openStoryViewer = (storyIndex, orderedStories = null) => {
+    // Si on reçoit des stories ordonnées (nouveau format), on les utilise
+    if (orderedStories) {
+      setDisplayableStories(orderedStories);
+    }
     setCurrentStoryIndex(storyIndex);
     setIsStoryViewerOpen(true);
   };

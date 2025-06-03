@@ -45,16 +45,17 @@ export const killIOSSafeArea = () => {
         position: relative !important;
       }
       
-      /* FORCE la TabBar à la position PARFAITE */
+      /* FORCE la TabBar à la position PARFAITE - SANS SAFE AREA */
       nav[class*="fixed"] {
         position: fixed !important;
-        bottom: 30px !important;
+        bottom: 0px !important;
         left: 0px !important;
         right: 0px !important;
         z-index: 999999999 !important;
-        transform: translateY(0) !important;
+        transform: none !important;
         width: 100vw !important;
         max-width: 100vw !important;
+        padding-bottom: 0 !important;
       }
       
       /* SUPPRIME TOUS les pseudo-éléments problématiques */
@@ -116,16 +117,17 @@ export const killIOSSafeArea = () => {
         root.style.position = 'relative';
       }
       
-      // Force la TabBar à la position PARFAITE
+      // Force la TabBar à la position PARFAITE - SANS SAFE AREA
       const nav = document.querySelector('nav');
       if (nav) {
         nav.style.position = 'fixed';
-        nav.style.bottom = '30px';
+        nav.style.bottom = '0px';
         nav.style.zIndex = '999999999';
         nav.style.width = '100vw';
         nav.style.left = '0px';
         nav.style.right = '0px';
-        nav.style.transform = 'translateY(0)';
+        nav.style.transform = 'none';
+        nav.style.paddingBottom = '0';
       }
       
       // CRUCIAL : Force le scroll des containers internes

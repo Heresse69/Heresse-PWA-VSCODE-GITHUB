@@ -16,9 +16,9 @@ const TabBar = () => {
 
   return (
     <nav 
-  className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md py-2 px-4 border-t border-border shadow-2xl max-w-md mx-auto z-50 pwa-safe-bottom"
-  style={{ backgroundColor: 'red', minHeight: '70px' }}
->
+      className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md py-2 px-4 border-t border-border shadow-2xl max-w-md mx-auto z-50"
+      style={{ backgroundColor: 'red', minHeight: '70px', paddingBottom: '0' }}
+    >
       <div className="flex justify-around items-center">
         {tabs.map(({ path, icon: Icon, label }) => {
           const isActive = location.pathname === path;

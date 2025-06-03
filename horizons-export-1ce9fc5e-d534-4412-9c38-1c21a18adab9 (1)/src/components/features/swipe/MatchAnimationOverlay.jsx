@@ -52,7 +52,7 @@ import React, { useEffect } from 'react';
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1, transition: { delay: 0.7, duration: 0.5 } }}
           >
-            Vous et <span className="font-bold text-white">{matchedUserData.name}</span> vous êtes mutuellement plu !
+            Vous et <span className="font-bold text-white">{matchedUserData.name}</span> vous êtes mutuellement likés !
           </motion.p>
 
           <motion.div
