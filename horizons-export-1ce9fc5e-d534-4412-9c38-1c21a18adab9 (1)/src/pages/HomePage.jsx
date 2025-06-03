@@ -265,7 +265,7 @@ const triggerSwipe = useCallback((direction) => {
   }
 
   return (
-    <div className="relative w-full h-screen flex flex-col bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
+    <div className="homepage-fixed bg-gradient-to-br from-slate-800 to-slate-900">
       {/* Zone principale - carte collée au header global */}
       <div className="flex-1 flex flex-col">
         <div className={`w-full max-w-md ${isPWA ? 'aspect-[3/4.5]' : 'aspect-[3/4]'} relative mx-auto px-2`}>

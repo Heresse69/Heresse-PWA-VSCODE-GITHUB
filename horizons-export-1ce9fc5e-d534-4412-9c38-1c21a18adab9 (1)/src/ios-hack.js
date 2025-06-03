@@ -35,18 +35,17 @@ export const killIOSSafeArea = () => {
         overflow: hidden !important;
       }
       
-      /* #root peut scroller */
+      /* #root sans scroll pour page home */
       #root {
         height: ${realHeight}px !important;
         max-height: ${realHeight}px !important;
         width: ${realWidth}px !important;
         max-width: ${realWidth}px !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
+        overflow: hidden !important;
         position: relative !important;
       }
       
-      /* FORCE la TabBar en position */
+      /* FORCE la TabBar à la position PARFAITE */
       nav[class*="fixed"] {
         position: fixed !important;
         bottom: 30px !important;
@@ -58,10 +57,22 @@ export const killIOSSafeArea = () => {
         max-width: 100vw !important;
       }
       
-      /* SUPPRIME seulement les pseudo-éléments de safe area */
-      body::after, html::after {
+      /* SUPPRIME TOUS les pseudo-éléments problématiques */
+      body::after, body::before,
+      html::after, html::before,
+      .max-w-md::after, .max-w-md::before,
+      .mx-auto::after, .mx-auto::before,
+      .flex::after, .flex::before,
+      .flex-col::after, .flex-col::before,
+      *::after, *::before {
         display: none !important;
         content: none !important;
+        height: 0 !important;
+        width: 0 !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        position: absolute !important;
+        z-index: -9999 !important;
       }
       
       /* PRÉSERVE LE SCROLL des containers internes - CRUCIAL ! */
@@ -101,12 +112,11 @@ export const killIOSSafeArea = () => {
       if (root) {
         root.style.height = realHeight + 'px';
         root.style.maxHeight = realHeight + 'px';
-        root.style.overflowY = 'auto';
-        root.style.overflowX = 'hidden';
-        root.style.webkitOverflowScrolling = 'touch';
+        root.style.overflow = 'hidden';
+        root.style.position = 'relative';
       }
       
-      // Force la TabBar
+      // Force la TabBar à la position PARFAITE
       const nav = document.querySelector('nav');
       if (nav) {
         nav.style.position = 'fixed';

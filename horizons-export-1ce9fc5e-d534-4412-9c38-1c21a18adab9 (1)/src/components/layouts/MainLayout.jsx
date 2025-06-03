@@ -50,6 +50,27 @@ const MainLayout = ({ onLogout, isAuthenticated, isKycComplete }) => {
     }
   };
 
+  // Fonction pour déterminer les classes CSS selon le contexte
+  const getMainContentClasses = (isHomePage, showNav, showHeader) => {
+    if (isHomePage) {
+      return 'homepage-fixed'; // HomePage complètement fixe
+    }
+    
+    if (!showHeader && !showNav) {
+      return 'fullscreen-page'; // Chat individuel, stories, etc.
+    }
+    
+    if (!showHeader && showNav) {
+      return 'scrollable-page-no-header'; // Contrainte par tabbar seulement
+    }
+    
+    if (showHeader && !showNav) {
+      return 'scrollable-page-no-tabbar'; // Contrainte par header seulement
+    }
+    
+    return 'scrollable-page'; // Contrainte par header ET tabbar
+  };
+
   if (!isAuthenticated && location.pathname !== '/landing' && location.pathname !== '/login' && location.pathname !== '/signup' && location.pathname !== '/kyc') {
     return <Navigate to="/landing" replace />;
   }
@@ -153,13 +174,7 @@ const mainContentOverflow = (isHomePage || isProfilePageActive || isViewStoryPag
   return (
     <div className="flex flex-col h-full bg-background text-foreground" style={{ overscrollBehavior: 'none', WebkitOverflowScrolling: 'auto' }}>
       {showHeader && (
-        <header 
-          className="p-2.5 flex items-center justify-between bg-background z-20 border-b border-border fixed top-0 left-0 right-0 max-w-md mx-auto"
-          style={{ 
-            paddingTop: `calc(0.625rem + env(safe-area-inset-top))`,
-            height: headerHeight,
-            overscrollBehavior: 'none'
-          }} 
+        <header className="main-header-fixed p-2.5 flex items-center justify-between"
         >
           <div className="flex items-center min-w-0">
             {!completelyHideLeftElement && showBackButton && (
@@ -190,7 +205,7 @@ const mainContentOverflow = (isHomePage || isProfilePageActive || isViewStoryPag
       )}
       
       <main 
-        className={`flex-grow main-content ${mainContentOverflow} ${mainContentPaddingBottom} ${mainContentPaddingTop}`}
+        className={`${getMainContentClasses(isHomePage, showNav, showHeader)}`}
         data-scrollable="true"
       >
   <motion.div
@@ -199,15 +214,15 @@ const mainContentOverflow = (isHomePage || isProfilePageActive || isViewStoryPag
   animate={{ opacity: 1, y: 0 }}
   exit={{ opacity: 0, y: (isChatPageActive || isMyPhotosPage || isUserPrivateGalleryPage || isViewStoryPage || isKycPage) ? 0 : -10 }}
   transition={{ duration: 0.18 }}
-  style={{ height: 'auto', overflow: 'visible' }}
+  style={{ height: '100%', width: '100%', overflow: 'visible' }}
+  className="prevent-scroll-restore"
 >
   <Outlet />
 </motion.div>
       </main>
 
       {showNav && (
-        <nav 
-          className="bg-background/95 backdrop-blur-md py-1 px-4 border-t border-border shadow-2xl fixed bottom-0 left-0 right-0 max-w-md mx-auto flex items-center z-50"
+        <nav className="main-tabbar-fixed flex items-center"
           style={{
             height: '60px',
             position: 'fixed',

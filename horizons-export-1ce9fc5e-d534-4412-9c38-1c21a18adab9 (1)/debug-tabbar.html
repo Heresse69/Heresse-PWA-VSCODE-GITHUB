@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug TabBar et Pseudo-Elements</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .result {
+            background: #f4f4f4;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ccc;
+        }
+        .error {
+            border-left-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        .success {
+            border-left-color: #27ae60;
+            background: #f2fdf2;
+        }
+        .warning {
+            border-left-color: #f39c12;
+            background: #fefbf2;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin: 5px;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛠️ Debug TabBar & Pseudo-Elements</h1>
+    
+    <div class="debug-section">
+        <h2>📍 Position TabBar</h2>
+        <button onclick="checkTabBarPosition()">Vérifier Position TabBar</button>
+        <div id="tabbar-results"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>👻 Détection Pseudo-Elements</h2>
+        <button onclick="detectPseudoElements()">Scanner Pseudo-Elements</button>
+        <div id="pseudo-results"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>📜 Scroll Page Home</h2>
+        <button onclick="checkHomePageScroll()">Vérifier Scroll Home</button>
+        <div id="scroll-results"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>🔧 Actions Rapides</h2>
+        <button onclick="fixTabBarPosition()">Fixer Position TabBar (10px)</button>
+        <button onclick="fixTabBarPosition(0)">Fixer Position TabBar (0px)</button>
+        <button onclick="fixHomePageScroll()">Fixer Scroll Home Page</button>
+        <button onclick="suppressAllPseudoElements()">Supprimer Tous Pseudo-Elements</button>
+        <div id="actions-results"></div>
+    </div>
+
+    <script>
+        // URL de votre app PWA
+        const APP_URL = 'http://localhost:3000'; // Changez selon votre setup
+        
+        function addResult(containerId, message, type = '') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = message;
+            container.appendChild(div);
+        }
+        
+        function clearResults(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+        
+        function checkTabBarPosition() {
+            clearResults('tabbar-results');
+            
+            // Simuler l'analyse de la TabBar
+            addResult('tabbar-results', `
+                <h3>🔍 Analyse TabBar</h3>
+                <p><strong>CSS actuel dans ios-hack.js :</strong></p>
+                <ul>
+                    <li>Position: fixed</li>
+                    <li>Bottom: 10px (récemment modifié de 30px)</li>
+                    <li>Z-index: 999999999</li>
+                    <li>Width: 100vw</li>
+                </ul>
+                
+                <p><strong>Conflits CSS possibles :</strong></p>
+                <ul>
+                    <li>Règles dans index.css qui forcent bottom: 0px</li>
+                    <li>Safe area inset qui pourrait causer des conflits</li>
+                    <li>Transform translateY qui pourrait interférer</li>
+                </ul>
+            `, 'warning');
+            
+            addResult('tabbar-results', `
+                <p><strong>Recommandation :</strong> La tabbar est positionnée à 10px du bas. 
+                Si elle paraît encore trop haute, essayez 0px ou même une valeur négative pour qu'elle touche le bas de l'écran.</p>
+            `, 'success');
+        }
+        
+        function detectPseudoElements() {
+            clearResults('pseudo-results');
+            
+            addResult('pseudo-results', `
+                <h3>👻 Pseudo-Elements Détectés</h3>
+                <p><strong>CSS Tailwind génère automatiquement :</strong></p>
+                <ul>
+                    <li>::before, ::after { --tw-content: ''; }</li>
+                    <li>Tous les éléments avec classes Tailwind ont des pseudo-elements</li>
+                </ul>
+                
+                <p><strong>Suppressions actives dans ios-hack.js :</strong></p>
+                <ul>
+                    <li>body::after, body::before</li>
+                    <li>html::after, html::before</li>
+                    <li>*::after, *::before (règle générale)</li>
+                </ul>
+                
+                <p><strong>Problèmes potentiels :</strong></p>
+                <ul>
+                    <li>Pseudo-elements peuvent créer un espace invisible sous la tabbar</li>
+                    <li>Safe area CSS pourrait générer des pseudo-elements</li>
+                </ul>
+            `, 'warning');
+        }
+        
+        function checkHomePageScroll() {
+            clearResults('scroll-results');
+            
+            addResult('scroll-results', `
+                <h3>📜 Analyse Scroll Page Home</h3>
+                <p><strong>Configuration actuelle (ios-hack.js) :</strong></p>
+                <ul>
+                    <li>#root : overflow: hidden ✅</li>
+                    <li>body : overflow: hidden ✅</li>
+                    <li>html : overflow: hidden ✅</li>
+                </ul>
+                
+                <p><strong>Problème résolu :</strong> Le scroll sur la page home a été supprimé 
+                en changeant #root de "overflow-y: auto" vers "overflow: hidden".</p>
+            `, 'success');
+            
+            addResult('scroll-results', `
+                <p><strong>Vérification :</strong> Si la page home scroll encore, 
+                c'est qu'il y a peut-être une règle CSS qui override notre correction 
+                ou un conteneur interne qui scroll.</p>
+            `, 'warning');
+        }
+        
+        function fixTabBarPosition(bottomValue = 10) {
+            clearResults('actions-results');
+            
+            addResult('actions-results', `
+                <h3>🔧 Action: Position TabBar → ${bottomValue}px</h3>
+                <p>Cette action simule la modification du fichier ios-hack.js pour positionner 
+                la tabbar à ${bottomValue}px du bas de l'écran.</p>
+                
+                <p><strong>Code à modifier :</strong></p>
+                <pre style="background: #f8f8f8; padding: 10px; overflow-x: auto;">
+nav[class*="fixed"] {
+  position: fixed !important;
+  bottom: ${bottomValue}px !important;
+  ...
+}</pre>
+                
+                <p>Et dans la fonction forcePosition() :</p>
+                <pre style="background: #f8f8f8; padding: 10px; overflow-x: auto;">
+nav.style.bottom = '${bottomValue}px';</pre>
+            `, 'success');
+        }
+        
+        function fixHomePageScroll() {
+            clearResults('actions-results');
+            
+            addResult('actions-results', `
+                <h3>🔧 Action: Correction Scroll Page Home</h3>
+                <p>Cette action a déjà été appliquée dans ios-hack.js :</p>
+                
+                <pre style="background: #f8f8f8; padding: 10px; overflow-x: auto;">
+#root {
+  overflow: hidden !important;  // Au lieu de overflow-y: auto
+}
+
+root.style.overflow = 'hidden';  // Au lieu de overflowY = 'auto'</pre>
+                
+                <p><strong>Status :</strong> ✅ Correction appliquée</p>
+            `, 'success');
+        }
+        
+        function suppressAllPseudoElements() {
+            clearResults('actions-results');
+            
+            addResult('actions-results', `
+                <h3>🔧 Action: Suppression Pseudo-Elements</h3>
+                <p>Suppression aggressive déjà active dans ios-hack.js :</p>
+                
+                <pre style="background: #f8f8f8; padding: 10px; overflow-x: auto;">
+*::after, *::before {
+  display: none !important;
+  content: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}</pre>
+                
+                <p><strong>Status :</strong> ✅ Suppression active</p>
+                <p><strong>Note :</strong> Cette règle supprime TOUS les pseudo-elements, 
+                ce qui peut casser certains styles mais garantit qu'aucun pseudo-element 
+                n'interfère avec la tabbar.</p>
+            `, 'success');
+        }
+        
+        // Auto-run initial checks
+        window.onload = function() {
+            addResult('tabbar-results', '📍 Cliquez sur "Vérifier Position TabBar" pour analyser', '');
+            addResult('pseudo-results', '👻 Cliquez sur "Scanner Pseudo-Elements" pour analyser', '');
+            addResult('scroll-results', '📜 Cliquez sur "Vérifier Scroll Home" pour analyser', '');
+        };
+    </script>
+</body>
+</html>

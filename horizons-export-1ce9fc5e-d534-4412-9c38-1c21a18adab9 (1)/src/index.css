@@ -11,6 +11,130 @@
   text-shadow: 0 10px 15px rgb(0 0 0 / 0.3), 0 4px 6px rgb(0 0 0 / 0.2);
 }
 
+/* LAYOUT STRICT - Header et TabBar doivent être considérés comme "dur" */
+.main-header-fixed {
+    position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 100 !important;
+  height: calc(3.5rem + env(safe-area-inset-top)) !important;
+  padding-top: calc(0.625rem + env(safe-area-inset-top)) !important;
+  background: hsl(var(--background) / 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+.main-tabbar-fixed {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 100 !important;
+  height: 60px !important;
+  background: hsl(var(--background) / 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border-top: 1px solid hsl(var(--border)) !important;
+}
+
+/* ZONE DE CONTENU - Contrainte entre header et tabbar */
+.content-zone-fixed {
+  position: fixed !important;
+  top: calc(3.5rem + env(safe-area-inset-top)) !important;
+  bottom: calc(60px + env(safe-area-inset-bottom)) !important;
+  left: 0 !important;
+  right: 0 !important;
+  max-width: 448px !important; /* max-w-md */
+  margin: 0 auto !important;
+  overflow: hidden !important;
+}
+
+/* HOMEPAGE - Complètement fixe, aucun scroll */
+.homepage-fixed {
+  position: fixed !important;
+  top: calc(3.5rem + env(safe-area-inset-top)) !important;
+  bottom: 60px !important;
+  left: 0 !important;
+  right: 0 !important;
+  max-width: 448px !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* PAGES AVEC SCROLL - Contraintes entre header et tabbar */
+.scrollable-page {
+  position: fixed !important;
+  top: calc(3.5rem + env(safe-area-inset-top)) !important;
+  bottom: 60px !important;
+  left: 0 !important;
+  right: 0 !important;
+  max-width: 448px !important;
+  margin: 0 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* PAGES SANS TABBAR - Contraintes entre header et bas d'écran */
+.scrollable-page-no-tabbar {
+  position: fixed !important;
+  top: calc(3.5rem + env(safe-area-inset-top)) !important;
+  bottom: env(safe-area-inset-bottom) !important;
+  left: 0 !important;
+  right: 0 !important;
+  max-width: 448px !important;
+  margin: 0 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* PAGES SANS HEADER - Contraintes entre haut d'écran et tabbar */
+.scrollable-page-no-header {
+  position: fixed !important;
+  top: env(safe-area-inset-top) !important;
+  bottom: calc(60px + env(safe-area-inset-bottom)) !important;
+  left: 0 !important;
+  right: 0 !important;
+  max-width: 448px !important;
+  margin: 0 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* PAGES FULLSCREEN - Chat individuel, stories, etc. */
+.fullscreen-page {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  max-width: 448px !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  z-index: 50 !important;
+}
+
+/* PROTECTION ANTI SCROLL REMONTÉE */
+.prevent-scroll-restore {
+  scroll-behavior: auto !important;
+}
+
+.reset-scroll-position {
+  scroll-behavior: auto !important;
+}
+
+.reset-scroll-position:before {
+  content: "";
+  display: block;
+  height: 0;
+  overflow: hidden;
+  clear: both;
+}
+
 /* PWA Specific Styles */
 @media (display-mode: standalone) {
   html, body {
@@ -449,24 +573,13 @@ span.inline-flex svg {
     background: hsl(var(--background)) !important;
   }
   
-  /* Cache la safe area avec un pseudo-élément de même couleur */
-  body::after {
-    content: '' !important;
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: env(safe-area-inset-bottom, 0px) !important;
-    background: hsl(var(--background)) !important;
-    z-index: 1 !important;
-    pointer-events: none !important;
-  }
+
   
-  /* FORCE la TabBar à descendre VRAIMENT en bas (sur la safe area) */
+  /* FORCE la TabBar tout en bas - SIMPLIFIÉ */
   nav[class*="fixed"][class*="bottom"] {
     bottom: 0 !important;
     z-index: 9999 !important;
-    transform: translateY(0) !important;
+    transform: none !important;
     position: fixed !important;
     left: 0 !important;
     right: 0 !important;
