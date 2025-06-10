@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const StoryBubble = ({ story, isOwnStory, isAddButton, onClick }) => {
   if (isAddButton) {
     return (
-      <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '90px', minWidth: '90px'}}>
+      <Link to="/stories/create" className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center" style={{width: '94px', minWidth: '94px'}}>
         <Button variant="outline" className="rounded-full border-dashed border-primary/50 bg-slate-700/50 text-primary hover:bg-primary/10 flex items-center justify-center" style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px', borderWidth: '2px', borderColor: 'hsl(var(--primary))'}}>
           <PlusCircle size={32} />
         </Button>
@@ -16,52 +16,60 @@ const StoryBubble = ({ story, isOwnStory, isAddButton, onClick }) => {
     );
   }
 
-  // FORCER L'AFFICHAGE DU CONTOUR POUR TOUTES LES STORIES NON PERSONNELLES
-  const shouldShowBorder = !isOwnStory;
+  // Utiliser la propriété hasUnseenStories du userStory, pas de la story individuelle
+  const showColoredBorder = !isOwnStory && story.hasUnseenStories;
 
   return (
     <div 
       className="flex-shrink-0 flex flex-col items-center space-y-1.5 text-center cursor-pointer" 
-      style={{width: '90px', minWidth: '90px'}}
+      style={{width: '94px', minWidth: '94px'}}
       onClick={onClick}
     >
-      <div className="relative">
-        {shouldShowBorder ? (
-          // Contour dégradé visible
-          <div className="relative">
-            <div 
-              className="absolute inset-0 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 via-red-500 to-yellow-400 p-1"
-              style={{
-                width: '94px',
-                height: '94px',
-                left: '-4px',
-                top: '-4px'
-              }}
-            >
-              <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
-                <Avatar 
-                  className="border-0 relative" 
-                  style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px'}}
-                >
-                  <AvatarImage src={story.url} alt={story.userName} />
-                  <AvatarFallback className="bg-slate-600" style={{fontSize: '18px'}}>
-                    {story.userName.substring(0, 1)}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+      <div className="relative" style={{width: '94px', height: '94px'}}>
+        {showColoredBorder ? (
+          // Contour dégradé pour stories non vues (sauf stories personnelles)
+          <div 
+            className="absolute inset-0 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 via-red-500 to-yellow-400"
+            style={{
+              width: '94px',
+              height: '94px',
+              padding: '4px'
+            }}
+          >
+            <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
+              <Avatar 
+                className="border-0" 
+                style={{width: '86px', height: '86px'}}
+              >
+                <AvatarImage src={story.url} alt={story.userName} />
+                <AvatarFallback className="bg-slate-600" style={{fontSize: '18px'}}>
+                  {story.userName.substring(0, 1)}
+                </AvatarFallback>
+              </Avatar>
             </div>
           </div>
         ) : (
-          // Story personnelle sans contour
-          <Avatar 
-            className="border-2 border-slate-600" 
-            style={{width: '86px', height: '86px', minWidth: '86px', minHeight: '86px'}}
+          // Contour gris pour stories vues ou story personnelle
+          <div 
+            className="absolute inset-0 rounded-full bg-gray-500"
+            style={{
+              width: '94px',
+              height: '94px',
+              padding: '4px'
+            }}
           >
-            <AvatarImage src={story.url} alt={story.userName} />
-            <AvatarFallback className="bg-slate-600" style={{fontSize: '18px'}}>
-              {story.userName.substring(0, 1)}
-            </AvatarFallback>
-          </Avatar>
+            <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
+              <Avatar 
+                className="border-0" 
+                style={{width: '86px', height: '86px'}}
+              >
+                <AvatarImage src={story.url} alt={story.userName} />
+                <AvatarFallback className="bg-slate-600" style={{fontSize: '18px'}}>
+                  {story.userName.substring(0, 1)}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+          </div>
         )}
       </div>
       <span className="text-xs text-gray-300 truncate w-full">
@@ -138,8 +146,8 @@ const StoryContainer = ({
 
   return (
     <div className={`mb-3 ${className}`}>
-      <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories ✨ (MODIFIÉ)</h2>
-      <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar" style={{width: 'fit-content', minWidth: '100%'}}>
+      <h2 className="text-sm font-semibold text-gray-400 mb-3 px-1">Stories ✨</h2>
+      <div className="flex space-x-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
         <StoryBubble isAddButton={true} />
         {userStories.map((userStory, index) => (
           <StoryBubble

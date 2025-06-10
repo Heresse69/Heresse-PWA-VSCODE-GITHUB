@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { useUser } from '@/contexts/UserContext'; 
 import { getMatches, getConversations } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
-import StoriesSection from '@/components/StoriesSection';
+import StoryContainer from '@/components/StoryContainer';
 import { applyPWAScrollFix } from '@/utils/pwaScrollFix';
 
 // Composant MatchCard pour afficher chaque profil de match
@@ -196,7 +196,7 @@ const MatchesPage = () => {
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
       {/* Container des stories uniquement */}
       <div className="flex-shrink-0 px-4 pt-4 pb-0">
-        <StoriesSection 
+        <StoryContainer 
           usersList={matchedProfilesList}
           currentUser={currentUser}
           onStoryClick={openStoryViewer}

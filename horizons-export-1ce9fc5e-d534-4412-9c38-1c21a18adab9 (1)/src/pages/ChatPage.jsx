@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useUser } from '@/contexts/UserContext'; 
 import { getConversations } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
-import StoriesSection from '@/components/StoriesSection';
+import StoryContainer from '../components/StoryContainer';
 
 const ChatCard = ({ chat, index }) => {
   const formatTimestamp = (timestamp) => {
@@ -146,7 +146,7 @@ const ChatPage = () => {
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
       {/* Container des stories uniquement */}
       <div className="flex-shrink-0 px-4 pt-4 pb-0">
-        <StoriesSection 
+        <StoryContainer 
           usersList={chatList}
           currentUser={currentUser}
           onStoryClick={openStoryViewer}
