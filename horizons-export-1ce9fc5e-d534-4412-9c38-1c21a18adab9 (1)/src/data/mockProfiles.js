@@ -1,18 +1,20 @@
 export const initialMockProfilesData = [
       {
         id: 'user1',
-        name: 'Sophie',
+        name: 'Claudia',
         age: 27,
         city: 'Bordeaux',
         distance: '5 km',
         bio: 'Passionnée de photographie et de couchers de soleil. Toujours prête pour une nouvelle aventure. 📸🌅✨',
         photos: [
-          'https://storage.googleapis.com/hostinger-horizons-assets-prod/1ce9fc5e-d534-4412-9c38-1c21a18adab9/f3b3925c38b54e471d82f737eca893be.png',
-          'https://storage.googleapis.com/hostinger-horizons-assets-prod/1ce9fc5e-d534-4412-9c38-1c21a18adab9/379676ff7c593c92be5317da1f20b2e3.png',
-        ],
+          'https://tfuxmmanlhpatxitfpkz.supabase.co/storage/v1/object/public/user-content//claudia_photo1.jpg',
+          'https://tfuxmmanlhpatxitfpkz.supabase.co/storage/v1/object/public/user-content//claudia_photo4.jpg',
+          'https://tfuxmmanlhpatxitfpkz.supabase.co/storage/v1/object/public/user-content//claudia_photo3.jpg',
+          'https://tfuxmmanlhpatxitfpkz.supabase.co/storage/v1/object/public/user-content//claudia_photo2.jpg'        ],
         referencePhotoIndex: 0,
         mediaSoldRating: 4.7,
-        avatar: 'https://storage.googleapis.com/hostinger-horizons-assets-prod/1ce9fc5e-d534-4412-9c38-1c21a18adab9/f3b3925c38b54e471d82f737eca893be.png'
+        avatar:'https://tfuxmmanlhpatxitfpkz.supabase.co/storage/v1/object/public/user-content//claudia_photo1.jpg',
+
       },
       {
         id: 'user2',

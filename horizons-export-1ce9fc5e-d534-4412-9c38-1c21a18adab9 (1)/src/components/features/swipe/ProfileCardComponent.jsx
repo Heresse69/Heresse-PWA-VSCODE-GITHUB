@@ -45,7 +45,7 @@ import React, { useState } from 'react';
                 initial={{ opacity: 0.8, scale: 1.02 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0.8, scale: 1.02 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.1 }}
               />
             </AnimatePresence>
             
@@ -56,7 +56,7 @@ import React, { useState } from 'react';
                         className="h-full bg-white/80"
                         initial={{ width: '0%'}}
                         animate={{ width: index === currentPhotoIndex ? '100%' : '0%'}}
-                        transition={{ duration: index === currentPhotoIndex ? 0.2 : 0, ease: "linear" }}
+                        transition={{ duration: index === currentPhotoIndex ? 0.1 : 0, ease: "linear" }}
                     />
                 </div>
               ))}
