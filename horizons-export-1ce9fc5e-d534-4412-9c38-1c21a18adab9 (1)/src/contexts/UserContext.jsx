@@ -1,5 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-    import { supabase } from '@/lib/supabaseClient';
+    import { supabase } from '../services/supabase/client.js';
+    import { authService } from '../services/supabase/auth.js';
+    import { profilesService } from '../services/supabase/profiles.js';
     import { 
         initialProfilePhotos, 
         initialPrivateGalleryItems, 
@@ -78,51 +80,27 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 
       const [stories, setStories] = useState(initialStoriesData);
       const [loading, setLoading] = useState(true);
-      const [seenStories, setSeenStories] = useState(new Set());
-
-      const fetchUserProfile = useCallback(async (userId) => {
-        const { data: userData, error: userError } = await supabase
-          .from('profiles')
-          .select(`
-            *,
-            profile_photos:profile_photos_user_profile_photos (id, url, is_main, is_verified, created_at),
-            user_galleries (
-              id, name, cover_image_url, price,
-              items:private_gallery_media (id, url, alt_text, price, media_type)
-            ),
-            stories:user_stories (id, user_id, url, type, created_at, duration, seen_by)
-          `)
-          .eq('id', userId)
-          .single();
-      
-        if (userError) {
-          console.error('Error fetching user profile from Supabase:', userError);
+      const [error, setError] = useState(null);
+      const [seenStories, setSeenStories] = useState(new Set());      const fetchUserProfile = useCallback(async (userId) => {
+        try {
+          const profileResult = await profilesService.getProfile(userId);
+          
+          if (profileResult.success) {
+            return profileResult.profile;
+          } else {
+            console.error('Error fetching user profile from Supabase:', profileResult.error);
+            return null;
+          }
+        } catch (error) {
+          console.error('Error in fetchUserProfile:', error);
           return null;
         }
-        
-        const { data: authUser, error: authError } = await supabase.auth.getUser();
-        if(authError || !authUser?.user) {
-            console.error("Error fetching auth user for unlocked galleries:", authError);
-            return {...userData, unlocked_galleries_ids: []};
-        }
-        
-        const { data: unlockedGalleriesData, error: unlockedGalleriesError } = await supabase
-            .from('users')
-            .select('unlocked_galleries')
-            .eq('id', authUser.user.id)
-            .single();
-
-        if (unlockedGalleriesError) {
-            console.error("Error fetching unlocked galleries for user:", unlockedGalleriesError);
-        }
-
-        return { ...userData, unlocked_galleries_ids: unlockedGalleriesData?.unlocked_galleries || [] };
       }, []);
       
-      const mapSupabaseUserToCurrentUser = (supabaseUser) => {
-        if (!supabaseUser) return {};
+      const mapSupabaseUserToCurrentUser = (supabaseProfile) => {
+        if (!supabaseProfile) return {};
         
-        const profilePhotosMapped = supabaseUser.profile_photos?.map(p => ({
+        const profilePhotosMapped = supabaseProfile.photos?.map(p => ({
             id: p.id,
             url: p.url,
             main: p.is_main,
@@ -133,52 +111,101 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
         const mainProfilePic = profilePhotosMapped.find(p => p.main)?.url || initialProfilePhotos[0]?.url;
 
         return {
-          id: supabaseUser.id,
-          name: supabaseUser.full_name || supabaseUser.raw_user_meta_data?.full_name || supabaseUser.raw_user_meta_data?.name || 'Utilisateur',
-          email: supabaseUser.email,
-          profilePicture: supabaseUser.profile_picture_url || supabaseUser.raw_user_meta_data?.avatar_url || mainProfilePic,
-          bio: supabaseUser.bio || supabaseUser.raw_user_meta_data?.bio || "Bio non définie.",
-          walletBalance: supabaseUser.wallet_balance || 0,
+          id: supabaseProfile.id,
+          name: supabaseProfile.full_name || 'Utilisateur',
+          email: supabaseProfile.email || '',
+          profilePicture: supabaseProfile.profile_picture_url || mainProfilePic,
+          bio: supabaseProfile.bio || "Bio non définie.",
+          walletBalance: supabaseProfile.wallet_balance || 0,
+          age: supabaseProfile.age,
+          city: supabaseProfile.city,
           profilePhotos: profilePhotosMapped,
-          privateGalleries: supabaseUser.user_galleries?.map(g => ({
+          privateGalleries: supabaseProfile.galleries?.map(g => ({
             id: g.id,
             name: g.name,
             coverImage: g.cover_image_url || mainProfilePic,
             price: g.price,
-            items: g.items?.map(i => ({ id: i.id, url: i.url, alt: i.alt_text, type: i.media_type, price: i.price })) || [],
+            items: g.items?.map(i => ({ 
+              id: i.id, 
+              url: i.url, 
+              alt: i.alt_text, 
+              type: i.media_type, 
+              price: i.price 
+            })) || [],
             itemCount: g.items?.length || 0,
           })) || [],
-          stories: supabaseUser.stories?.map(s => ({...s, timestamp: s.created_at, seen: s.seen_by?.includes(currentUser?.id)})) || [], // currentUser can be stale here
-          unlockedGalleries: supabaseUser.unlocked_galleries_ids || [],
-          unlockedMedia: supabaseUser.unlocked_media || [], // This might need specific fetching logic if stored separately
-          rawUserData: supabaseUser, // keep raw for other potential uses
+          stories: supabaseProfile.stories?.map(s => ({
+            ...s, 
+            timestamp: s.created_at, 
+            seen: false // À calculer selon la logique métier
+          })) || [],
+          unlockedGalleries: supabaseProfile.unlocked_galleries || [],
+          unlockedMedia: supabaseProfile.unlocked_media || [],
+          premiumStatus: supabaseProfile.premium_status || {
+            subscriptionType: null, 
+            incognitoMode: false,
+            canRewind: false,
+            canSuperlike: true, 
+            canBoost: false,
+          },
+          settings: supabaseProfile.settings || {
+            notifications: true,
+            theme: 'dark',
+            minLiveCallDuration: 1,
+          },
+          stats: {
+            profileViews: supabaseProfile.profile_views || 0,
+            matches: supabaseProfile.matches_count || 0,
+            photosSold: supabaseProfile.photos_sold || 0,
+            revenueGenerated: supabaseProfile.revenue_generated || 0,
+            averageRating: supabaseProfile.average_rating || 0,
+          },
+          photoRatings: supabaseProfile.photo_ratings || {},
+          newMatchesCount: supabaseProfile.new_matches_count || 0,
+          totalUnreadMessagesCount: supabaseProfile.unread_messages_count || 0,
+          rawUserData: supabaseProfile,
         };
       };
 
       useEffect(() => {
         const initializeUser = async () => {
           setLoading(true);
-          const { data: { session } } = await supabase.auth.getSession();
           
-          let userIdToLoad = 'currentUserHerese'; 
-          let finalUserObject = { ...currentUser };
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            let userIdToLoad = 'currentUserHerese'; 
+            let finalUserObject = { ...currentUser };
 
-          if (session?.user) {
-            userIdToLoad = session.user.id;
-            const supabaseProfile = await fetchUserProfile(userIdToLoad);
-            if (supabaseProfile) {
-              finalUserObject = { ...currentUser, ...mapSupabaseUserToCurrentUser(supabaseProfile) };
-              finalUserObject.stories = initialStoriesData.filter(s => s.userId === finalUserObject.id || s.userId === 'currentUserHerese'); // Ensure 'Moi' stories
+            if (session?.user) {
+              userIdToLoad = session.user.id;
+              const supabaseProfile = await fetchUserProfile(userIdToLoad);
+              
+              if (supabaseProfile) {
+                finalUserObject = { 
+                  ...currentUser, 
+                  ...mapSupabaseUserToCurrentUser(supabaseProfile) 
+                };
+                finalUserObject.stories = initialStoriesData.filter(s => 
+                  s.userId === finalUserObject.id || s.userId === 'currentUserHerese'
+                );
+              } else {
+                console.warn(`Supabase profile not found for ${userIdToLoad}, using local defaults with ID override.`);
+                finalUserObject.id = userIdToLoad; 
+                finalUserObject.email = session.user.email;
+              }
             } else {
-              console.warn(`Supabase profile not found for ${userIdToLoad}, using local defaults with ID override.`);
-              finalUserObject.id = userIdToLoad; 
+               console.warn("No active Supabase session, using local default 'currentUserHerese'.");
+               finalUserObject.stories = initialStoriesData.filter(s => s.userId === 'currentUserHerese');
             }
-          } else {
-             console.warn("No active Supabase session, using local default 'currentUserHerese'.");
-             finalUserObject.stories = initialStoriesData.filter(s => s.userId === 'currentUserHerese');
+            
+            setCurrentUser(finalUserObject);
+          } catch (error) {
+            console.error('Error during user initialization:', error);
+            setError('Erreur lors de l\'initialisation de l\'utilisateur');
+          } finally {
+            setLoading(false);
           }
-          setCurrentUser(finalUserObject);
-          setLoading(false);
         };
 
         initializeUser();
@@ -186,31 +213,83 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
         const { data: authListener } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             setLoading(true);
-            if (event === 'SIGNED_IN' && session?.user) {
-              const supabaseProfile = await fetchUserProfile(session.user.id);
-               if (supabaseProfile) {
-                const mappedUser = mapSupabaseUserToCurrentUser(supabaseProfile);
-                setCurrentUser(prev => ({...prev, ...mappedUser, stories: initialStoriesData.filter(s => s.userId === mappedUser.id || s.userId === 'currentUserHerese')}));
-              } else {
-                // Minimal update if profile fetch fails but session exists
-                setCurrentUser(prev => ({...prev, id: session.user.id, email: session.user.email, stories: initialStoriesData.filter(s => s.userId === session.user.id || s.userId === 'currentUserHerese') }));
+            
+            try {
+              if (event === 'SIGNED_IN' && session?.user) {
+                const supabaseProfile = await fetchUserProfile(session.user.id);
+                
+                if (supabaseProfile) {
+                  const mappedUser = mapSupabaseUserToCurrentUser(supabaseProfile);
+                  setCurrentUser(prev => ({
+                    ...prev, 
+                    ...mappedUser, 
+                    stories: initialStoriesData.filter(s => 
+                      s.userId === mappedUser.id || s.userId === 'currentUserHerese'
+                    )
+                  }));
+                } else {
+                  // Minimal update if profile fetch fails but session exists
+                  setCurrentUser(prev => ({
+                    ...prev, 
+                    id: session.user.id, 
+                    email: session.user.email, 
+                    stories: initialStoriesData.filter(s => 
+                      s.userId === session.user.id || s.userId === 'currentUserHerese'
+                    )
+                  }));
+                }
+              } else if (event === 'SIGNED_OUT') {
+                // Reset to a default anonymous-like state or a specific local default
+                const localDefault = {
+                  id: 'currentUserHerese', 
+                  name: 'Robin Testeur', 
+                  email: 'robin.testeur@example.com',
+                  profilePicture: initialProfilePhotos[0].url, 
+                  bio: "Passionné par la tech et les voyages. Toujours prêt pour une nouvelle aventure ! 🚀\nCherche des connexions authentiques.", 
+                  walletBalance: 150.75,
+                  profilePhotos: initialProfilePhotos, 
+                  privateGalleries: [{ 
+                    id: `pg_currentUserHerese_default`, 
+                    name: "Ma galerie privée", 
+                    coverImage: initialProfilePhotos[0].url, 
+                    price: 5, 
+                    items: initialPrivateGalleryItems, 
+                    itemCount: initialPrivateGalleryItems.length 
+                  }],
+                  stories: initialStoriesData.filter(s => s.userId === 'currentUserHerese'),
+                  premiumStatus: { 
+                    subscriptionType: null, 
+                    incognitoMode: false, 
+                    canRewind: false, 
+                    canSuperlike: true, 
+                    canBoost: false 
+                  },
+                  settings: { 
+                    notifications: true, 
+                    theme: 'dark', 
+                    minLiveCallDuration: 1 
+                  },
+                  stats: { 
+                    profileViews: 1024, 
+                    matches: 42, 
+                    photosSold: 15, 
+                    revenueGenerated: 75.50, 
+                    averageRating: 4.2 
+                  },
+                  photoRatings: {}, 
+                  newMatchesCount: 5, 
+                  totalUnreadMessagesCount: 3,
+                  unlockedGalleries: [], 
+                  unlockedMedia: [],
+                };
+                setCurrentUser(localDefault);
               }
-            } else if (event === 'SIGNED_OUT') {
-              // Reset to a default anonymous-like state or a specific local default
-              const localDefault = {
-                id: 'currentUserHerese', name: 'Robin Testeur', email: 'robin.testeur@example.com',
-                profilePicture: initialProfilePhotos[0].url, bio: "Passionné...", walletBalance: 150.75,
-                profilePhotos: initialProfilePhotos, privateGalleries: [{ id: `pg_currentUserHerese_default`, name: "Ma galerie privée", coverImage: initialProfilePhotos[0].url, price: 5, items: initialPrivateGalleryItems, itemCount: initialPrivateGalleryItems.length }],
-                stories: initialStoriesData.filter(s => s.userId === 'currentUserHerese'),
-                premiumStatus: { subscriptionType: null, incognitoMode: false, canRewind: false, canSuperlike: true, canBoost: false },
-                settings: { notifications: true, theme: 'dark', minLiveCallDuration: 1 },
-                stats: { profileViews: 1024, matches: 42, photosSold: 15, revenueGenerated: 75.50, averageRating: 4.2 },
-                photoRatings: {}, newMatchesCount: 5, totalUnreadMessagesCount: 3,
-                unlockedGalleries: [], unlockedMedia: [],
-              };
-              setCurrentUser(localDefault);
+            } catch (error) {
+              console.error('Error during auth state change:', error);
+              setError('Erreur lors du changement d\'état d\'authentification');
+            } finally {
+              setLoading(false);
             }
-            setLoading(false);
           }
         );
         
@@ -220,12 +299,31 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
       }, [fetchUserProfile]);
 
 
-      const updateWalletBalance = (amount) => {
+      const updateWalletBalance = async (amount) => {
+        const newBalance = Math.max(0, currentUser.walletBalance + amount);
+        
         setCurrentUser(prev => ({
           ...prev,
-          walletBalance: Math.max(0, prev.walletBalance + amount)
+          walletBalance: newBalance
         }));
-        // TODO: Persist to Supabase: supabase.from('profiles').update({ wallet_balance: newBalance }).eq('id', currentUser.id)
+
+        // Persister dans Supabase
+        try {
+          const updateResult = await profilesService.updateProfile(currentUser.id, {
+            wallet_balance: newBalance
+          });
+          
+          if (!updateResult.success) {
+            console.error('Erreur lors de la mise à jour du portefeuille:', updateResult.error);
+            // Revenir à l'ancienne valeur en cas d'erreur
+            setCurrentUser(prev => ({
+              ...prev,
+              walletBalance: currentUser.walletBalance
+            }));
+          }
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour du portefeuille:', error);
+        }
       };
 
       const addUnlockedGallery = (galleryId) => {
@@ -300,9 +398,60 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
         markStoryAsSeenLogic(setStories, setCurrentUser, storyId);
       };
       
-      const updateBio = (newBio) => {
+      const updateBio = async (newBio) => {
+        // Mise à jour locale immédiate pour une meilleure UX
         setCurrentUser(prev => ({ ...prev, bio: newBio }));
-        // TODO: Persist to Supabase: supabase.from('profiles').update({ bio: newBio }).eq('id', currentUser.id)
+        
+        // Persister dans Supabase
+        try {
+          const updateResult = await profilesService.updateProfile(currentUser.id, {
+            bio: newBio
+          });
+          
+          if (!updateResult.success) {
+            console.error('Erreur lors de la mise à jour de la bio:', updateResult.error);
+            // Revenir à l'ancienne valeur en cas d'erreur
+            setCurrentUser(prev => ({ ...prev, bio: currentUser.bio }));
+          }
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour de la bio:', error);
+        }
+      };
+
+      // Nouvelles fonctions pour l'authentification
+      const signUp = async (email, password, userData = {}) => {
+        try {
+          const result = await authService.signUp(email, password, userData);
+          return result;
+        } catch (error) {
+          setError(error.message);
+          return { success: false, error: error.message };
+        }
+      };
+
+      const signIn = async (email, password) => {
+        try {
+          const result = await authService.signIn(email, password);
+          return result;
+        } catch (error) {
+          setError(error.message);
+          return { success: false, error: error.message };
+        }
+      };
+
+      const signOut = async () => {
+        try {
+          const result = await authService.signOut();
+          return result;
+        } catch (error) {
+          setError(error.message);
+          return { success: false, error: error.message };
+        }
+      };
+
+      // Fonction pour effacer les erreurs
+      const clearError = () => {
+        setError(null);
       };
 
       const value = {
@@ -329,6 +478,13 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
         setCurrentUser, // Be cautious with direct exposure
         supabase, 
         loading,
+        error,
+        clearError,
+        // Authentication functions
+        signUp,
+        signIn,
+        signOut,
+        // Constants
         MAX_PROFILE_PHOTOS,
         MIN_PROFILE_PHOTOS,
         MAX_PRIVATE_GALLERY_ITEMS,
