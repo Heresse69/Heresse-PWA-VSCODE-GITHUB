@@ -2,8 +2,8 @@
  * Hook personnalisé pour la gestion des matches
  */
 import { useState, useEffect, useCallback } from 'react';
-import { matchesService } from '../services/supabase/matches.js';
-import { messagesService } from '../services/supabase/messages.js';
+import { matchesService } from '@/services/supabase/matches.js';
+import { messagesService } from '@/services/supabase/messages.js';
 
 export const useMatches = () => {
   const [matches, setMatches] = useState([]);

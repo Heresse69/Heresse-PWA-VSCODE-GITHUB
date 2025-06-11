@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>🧪 Tests Progressifs - Heresse PWA</title>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: #10b981;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .test-card {
+      background: #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      border-left: 4px solid #10b981;
+    }
+    
+    .test-title {
+      color: #60a5fa;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .test-description {
+      color: #9ca3af;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    
+    .test-button {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.2s;
+    }
+    
+    .test-button:hover {
+      transform: translateY(-1px);
+    }
+    
+    .test-button:active {
+      transform: translateY(0);
+    }
+    
+    .test-button.warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .test-button.primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+    
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .status-item {
+      background: #1f2937;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .success { color: #10b981; }
+    .warning { color: #f59e0b; }
+    .error { color: #ef4444; }
+    
+    @media (max-width: 600px) {
+      .status-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Tests Progressifs PWA</h1>
+    
+    <div class="test-card" style="border-left-color: #10b981;">
+      <div class="test-title">✅ App d'Urgence (Fonctionne !)</div>
+      <div class="test-description">
+        Version ultra-simple avec React pur. Confirmé fonctionnel sur mobile.
+      </div>
+      <button class="test-button" onclick="window.location.href='/'">
+        🚨 App d'Urgence
+      </button>
+    </div>
+    
+    <div class="test-card" style="border-left-color: #3b82f6;">
+      <div class="test-title">🔧 Étape 1 : Router</div>
+      <div class="test-description">
+        Ajoute React Router à la base qui fonctionne. Test de navigation entre pages.
+      </div>
+      <button class="test-button primary" onclick="window.location.href='/etape1-router.html'">
+        🧪 Tester Router
+      </button>
+    </div>
+    
+    <div class="test-card" style="border-left-color: #f59e0b;">
+      <div class="test-title">🎨 Étape 2 : CSS</div>
+      <div class="test-description">
+        Ajoute les styles CSS et Tailwind. Test de l'affichage et des couleurs.
+      </div>
+      <button class="test-button warning" onclick="window.location.href='/etape2-css.html'">
+        🧪 Tester CSS
+      </button>
+    </div>
+    
+    <div class="test-card" style="border-left-color: #8b5cf6;">
+      <div class="test-title">🧩 Étape 3 : Composants</div>
+      <div class="test-description">
+        Ajoute les composants UI de base. Test des boutons, cartes, et layouts.
+      </div>
+      <button class="test-button" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);" onclick="alert('Étape 3 en préparation...')">
+        🧪 Tester Composants (Bientôt)
+      </button>
+    </div>
+    
+    <div class="test-card" style="border-left-color: #ef4444;">
+      <div class="test-title">🔗 App Principale (Cassée)</div>
+      <div class="test-description">
+        Application complète avec tous les composants. Actuellement en écran blanc.
+      </div>
+      <button class="test-button" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);" onclick="window.location.href='/app-principale-debug.html'">
+        ❌ App Principale (Debug)
+      </button>
+    </div>
+    
+    <div class="test-card" style="border-left-color: #9ca3af;">
+      <div class="test-title">📊 Status Tests</div>
+      <div class="status-grid">
+        <div class="status-item">
+          <div class="success">✅</div>
+          <div>Urgence</div>
+        </div>
+        <div class="status-item">
+          <div class="warning">⏳</div>
+          <div>Router</div>
+        </div>
+        <div class="status-item">
+          <div class="warning">⏳</div>
+          <div>CSS</div>
+        </div>
+        <div class="status-item">
+          <div class="error">❌</div>
+          <div>App Full</div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+      <button 
+        class="test-button" 
+        onclick="location.reload()"
+        style="max-width: 200px;"
+      >
+        🔄 Rafraîchir
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Informations de contexte
+    console.log('🧪 Page de tests progressifs chargée');
+    console.log('Device:', {
+      userAgent: navigator.userAgent.substring(0, 60),
+      screen: `${screen.width}x${screen.height}`,
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      touch: 'ontouchstart' in window,
+      standalone: window.matchMedia('(display-mode: standalone)').matches
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>🎨 Test Étape 2 - CSS</title>
+  
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: white;
+    }
+    
+    #root {
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div style="padding: 20px; text-align: center;">
+      <div style="background: #333; padding: 20px; border-radius: 8px; margin: 20px auto; max-width: 400px;">
+        <h2 style="color: #f59e0b;">⏳ Chargement Étape 2...</h2>
+        <p>Test des CSS et Tailwind</p>
+        <div id="loading-timer" style="font-family: monospace; margin-top: 15px;">
+          Temps écoulé: <span id="timer">0</span>s
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Timer de chargement
+    let seconds = 0;
+    const timer = setInterval(() => {
+      seconds++;
+      const timerEl = document.getElementById('timer');
+      if (timerEl) {
+        timerEl.textContent = seconds;
+      }
+      
+      // Si ça prend plus de 10 secondes, il y a un problème
+      if (seconds > 10) {
+        clearInterval(timer);
+        document.getElementById('root').innerHTML = `
+          <div style="padding: 20px; text-align: center; background: #1a1a1a; color: white; min-height: 100vh;">
+            <div style="background: #ef4444; padding: 20px; border-radius: 8px; margin: 20px auto; max-width: 500px;">
+              <h2>❌ Échec Étape 2 - CSS</h2>
+              <p>Les CSS ont pris plus de 10 secondes à charger.</p>
+              <div style="margin: 20px 0;">
+                <button onclick="window.location.href='/etape1-router.html'" style="background: #f59e0b; color: white; border: none; padding: 12px 20px; border-radius: 6px; margin: 5px; cursor: pointer;">
+                  ⬅️ Étape 1
+                </button>
+                <button onclick="window.location.href='/'" style="background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 6px; margin: 5px; cursor: pointer;">
+                  🏠 Urgence
+                </button>
+                <button onclick="location.reload()" style="background: #3b82f6; color: white; border: none; padding: 12px 20px; border-radius: 6px; margin: 5px; cursor: pointer;">
+                  🔄 Réessayer
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }, 1000);
+    
+    // Arrêter le timer si React prend le contrôle
+    const observer = new MutationObserver(() => {
+      const hasReactContent = document.querySelector('[data-reactroot]') || 
+                              !document.querySelector('#loading-timer');
+      
+      if (hasReactContent) {
+        clearInterval(timer);
+        observer.disconnect();
+      }
+    });
+    
+    observer.observe(document.getElementById('root'), {
+      childList: true,
+      subtree: true
+    });
+  </script>
+
+  <!-- Chargement de l'étape 2 -->
+  <script type="module" src="/src/main-etape2-css.jsx"></script>
+</body>
+</html>

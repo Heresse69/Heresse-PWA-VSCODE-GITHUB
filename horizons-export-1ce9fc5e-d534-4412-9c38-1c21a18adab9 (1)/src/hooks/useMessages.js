@@ -2,7 +2,7 @@
  * Hook personnalisé pour la gestion des messages
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { messagesService } from '../services/supabase/messages.js';
+import { messagesService } from '@/services/supabase/messages.js';
 
 export const useMessages = (matchId) => {
   const [messages, setMessages] = useState([]);

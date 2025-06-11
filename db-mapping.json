@@ -191,20 +191,3 @@
     ]
   }
 }
-      "returns": "decimal",
-      "language": "sql",
-      "definition": "SELECT earth_distance(ll_to_earth(lat1, lon1), ll_to_earth(lat2, lon2))"
-    },
-    "get_nearby_users": {
-      "description": "Récupère les utilisateurs à proximité d'un utilisateur donné",
-      "parameters": ["user_id uuid", "max_distance_km integer"],
-      "returns": "setof user_profiles",
-      "language": "sql",
-      "definition": `
-        SELECT * FROM user_profiles
-        WHERE id != user_id
-        AND earth_box(ll_to_earth(latitude, longitude), max_distance_km * 1000) @> ll_to_earth((SELECT latitude FROM user_profiles WHERE id = user_id), (SELECT longitude FROM user_profiles WHERE id = user_id))
-      `
-    }
-  }
-}

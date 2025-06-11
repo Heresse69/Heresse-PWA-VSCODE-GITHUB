@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>📱 Diagnostic Mobile - Heresse PWA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #ffffff;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .diagnostic-container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #10b981;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        .test-section {
+            background: #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #10b981;
+        }
+        
+        .test-title {
+            color: #60a5fa;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .result {
+            background: #1f2937;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            margin: 8px 0;
+            word-break: break-all;
+        }
+        
+        .success { color: #10b981; }
+        .warning { color: #fbbf24; }
+        .error { color: #ef4444; }
+        
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 5px;
+            width: 100%;
+        }
+        
+        button:active {
+            background: #059669;
+        }
+        
+        .app-link {
+            background: #3b82f6;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+        
+        .logs {
+            background: #000;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="diagnostic-container">
+        <h1>📱 Diagnostic Mobile PWA</h1>
+        
+        <div class="test-section">
+            <div class="test-title">🌐 Informations Navigateur</div>
+            <div class="result" id="browser-info"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">📱 Caractéristiques Mobile</div>
+            <div class="result" id="mobile-info"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">🔧 Service Worker Status</div>
+            <div class="result" id="sw-status"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">📦 Cache Status</div>
+            <div class="result" id="cache-status"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">🌍 Connectivité Réseau</div>
+            <div class="result" id="network-status"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">📊 Test de Chargement React</div>
+            <div class="result" id="react-test"></div>
+            <button onclick="testReactApp()">🧪 Tester React App</button>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">🚀 Actions de Diagnostic</div>
+            <div class="grid">
+                <button onclick="clearAllData()">🧹 Vider Cache</button>
+                <button onclick="testConnectivity()">🌐 Test Réseau</button>
+                <button onclick="reloadPage()">🔄 Recharger</button>
+                <button onclick="goToMainApp()">📱 App Principale</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">📋 Logs en Temps Réel</div>
+            <div class="logs" id="real-time-logs"></div>
+            <button onclick="clearLogs()">🗑️ Vider Logs</button>
+        </div>
+        
+        <a href="/" class="app-link">
+            ↩️ Retour à l'Application Principale
+        </a>
+    </div>
+
+    <script>
+        let logs = document.getElementById('real-time-logs');
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logs.innerHTML += `\n${prefix} [${timestamp}] ${message}`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+        
+        // Capturer toutes les erreurs
+        window.addEventListener('error', (e) => {
+            addLog(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`, 'error');
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            addLog(`PROMISE ERROR: ${e.reason}`, 'error');
+        });
+        
+        // Diagnostic initial
+        function runDiagnostics() {
+            addLog('🚀 Début du diagnostic mobile');
+            
+            // Informations navigateur
+            const browserInfo = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                innerWidth: window.innerWidth,
+                innerHeight: window.innerHeight,
+                devicePixelRatio: window.devicePixelRatio || 1
+            };
+            
+            document.getElementById('browser-info').innerHTML = Object.entries(browserInfo)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join('<br>');
+            
+            // Caractéristiques mobile
+            const mobileInfo = {
+                isMobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+                isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+                isPWA: window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches,
+                hasTouch: 'ontouchstart' in window,
+                orientation: screen.orientation ? screen.orientation.angle : 'unknown',
+                safeAreaTop: 'env(safe-area-inset-top)' in document.documentElement.style,
+                viewport: document.querySelector('meta[name="viewport"]')?.content || 'none'
+            };
+            
+            document.getElementById('mobile-info').innerHTML = Object.entries(mobileInfo)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join('<br>');
+            
+            // Service Worker
+            checkServiceWorker();
+            
+            // Cache
+            checkCacheStatus();
+            
+            // Réseau
+            checkNetworkStatus();
+            
+            addLog('✅ Diagnostic initial terminé');
+        }
+        
+        async function checkServiceWorker() {
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    const activeWorker = await navigator.serviceWorker.ready;
+                    
+                    document.getElementById('sw-status').innerHTML = `
+                        Supporté: ✅<br>
+                        Registrations: ${registrations.length}<br>
+                        État: ${activeWorker.active ? 'Actif' : 'Inactif'}<br>
+                        Scope: ${activeWorker.scope}<br>
+                        Script: ${activeWorker.active?.scriptURL || 'N/A'}
+                    `;
+                    
+                    addLog(`SW: ${registrations.length} registration(s), état: ${activeWorker.active ? 'actif' : 'inactif'}`, 'success');
+                } else {
+                    document.getElementById('sw-status').innerHTML = 'Service Workers non supportés ❌';
+                    addLog('SW: Non supporté', 'error');
+                }
+            } catch (error) {
+                document.getElementById('sw-status').innerHTML = `Erreur: ${error.message}`;
+                addLog(`SW Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function checkCacheStatus() {
+            try {
+                const cacheNames = await caches.keys();
+                let totalSize = 0;
+                let totalEntries = 0;
+                
+                for (const name of cacheNames) {
+                    const cache = await caches.open(name);
+                    const keys = await cache.keys();
+                    totalEntries += keys.length;
+                }
+                
+                document.getElementById('cache-status').innerHTML = `
+                    Caches: ${cacheNames.length}<br>
+                    Noms: ${cacheNames.join(', ') || 'Aucun'}<br>
+                    Entrées: ${totalEntries}
+                `;
+                
+                addLog(`Cache: ${cacheNames.length} cache(s), ${totalEntries} entrées`, 'success');
+            } catch (error) {
+                document.getElementById('cache-status').innerHTML = `Erreur: ${error.message}`;
+                addLog(`Cache Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function checkNetworkStatus() {
+            const networkInfo = {
+                online: navigator.onLine,
+                connection: navigator.connection ? {
+                    effectiveType: navigator.connection.effectiveType,
+                    downlink: navigator.connection.downlink,
+                    rtt: navigator.connection.rtt
+                } : 'Non disponible'
+            };
+            
+            document.getElementById('network-status').innerHTML = `
+                En ligne: ${networkInfo.online ? '✅' : '❌'}<br>
+                Type: ${networkInfo.connection.effectiveType || 'N/A'}<br>
+                Vitesse: ${networkInfo.connection.downlink || 'N/A'} Mbps<br>
+                Latence: ${networkInfo.connection.rtt || 'N/A'} ms
+            `;
+            
+            addLog(`Réseau: ${networkInfo.online ? 'En ligne' : 'Hors ligne'}`, networkInfo.online ? 'success' : 'error');
+        }
+        
+        async function testReactApp() {
+            addLog('🧪 Test de chargement React...');
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch('/');
+                const html = await response.text();
+                const loadTime = Date.now() - startTime;
+                
+                const hasReact = html.includes('react');
+                const hasRoot = html.includes('root');
+                const hasManifest = html.includes('manifest');
+                
+                document.getElementById('react-test').innerHTML = `
+                    <span class="success">✅ Fetch réussi (${loadTime}ms)</span><br>
+                    React détecté: ${hasReact ? '✅' : '❌'}<br>
+                    Root div: ${hasRoot ? '✅' : '❌'}<br>
+                    Manifest: ${hashasManifest ? '✅' : '❌'}<br>
+                    Taille HTML: ${html.length} caractères
+                `;
+                
+                addLog(`React test: Succès en ${loadTime}ms`, 'success');
+                
+                // Test direct du JavaScript
+                const scriptTest = document.createElement('div');
+                scriptTest.id = 'react-mount-test';
+                document.body.appendChild(scriptTest);
+                
+                setTimeout(() => {
+                    if (window.React) {
+                        addLog('React library détectée dans window', 'success');
+                    } else {
+                        addLog('React library NON détectée', 'error');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                document.getElementById('react-test').innerHTML = `<span class="error">❌ Erreur: ${error.message}</span>`;
+                addLog(`React test Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function clearAllData() {
+            addLog('🧹 Nettoyage complet...');
+            
+            try {
+                // Supprimer caches
+                const cacheNames = await caches.keys();
+                for (const name of cacheNames) {
+                    await caches.delete(name);
+                    addLog(`Cache supprimé: ${name}`, 'success');
+                }
+                
+                // Désenregistrer SW
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                        addLog(`SW désenregistré: ${registration.scope}`, 'success');
+                    }
+                }
+                
+                // Vider storage
+                localStorage.clear();
+                sessionStorage.clear();
+                addLog('Storage vidé', 'success');
+                
+                addLog('✅ Nettoyage terminé - Rechargement dans 2s...', 'success');
+                setTimeout(() => location.reload(), 2000);
+                
+            } catch (error) {
+                addLog(`Erreur nettoyage: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testConnectivity() {
+            addLog('🌐 Test de connectivité...');
+            
+            const tests = [
+                { name: 'App principale', url: '/' },
+                { name: 'Manifest', url: '/manifest.json' },
+                { name: 'SW Dev', url: '/sw-dev.js' },
+                { name: 'Icone', url: '/icons/favicon.svg' }
+            ];
+            
+            for (const test of tests) {
+                try {
+                    const start = Date.now();
+                    const response = await fetch(test.url);
+                    const time = Date.now() - start;
+                    addLog(`${test.name}: ${response.status} (${time}ms)`, response.ok ? 'success' : 'error');
+                } catch (error) {
+                    addLog(`${test.name}: ERREUR ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        function reloadPage() {
+            addLog('🔄 Rechargement de la page...');
+            setTimeout(() => location.reload(true), 500);
+        }
+        
+        function goToMainApp() {
+            addLog('📱 Redirection vers app principale...');
+            setTimeout(() => window.location.href = '/', 500);
+        }
+        
+        function clearLogs() {
+            logs.innerHTML = '';
+            addLog('📋 Logs vidés');
+        }
+        
+        // Lancer le diagnostic au chargement
+        document.addEventListener('DOMContentLoaded', runDiagnostics);
+        
+        // Actualiser les infos réseau périodiquement
+        setInterval(checkNetworkStatus, 10000);
+    </script>
+</body>
+</html>

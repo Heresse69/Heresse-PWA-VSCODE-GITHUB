@@ -15,8 +15,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 })
 
-// Export types pour TypeScript (si besoin plus tard)
-export type Database = {
+// Types TypeScript commentés car ce fichier est en .js
+// Si vous voulez utiliser TypeScript, renommez ce fichier en client.ts
+/*
+// export type Database = {
   public: {
     Tables: {
       user_profiles: {
@@ -98,3 +100,4 @@ export type Database = {
     }
   }
 }
+*/

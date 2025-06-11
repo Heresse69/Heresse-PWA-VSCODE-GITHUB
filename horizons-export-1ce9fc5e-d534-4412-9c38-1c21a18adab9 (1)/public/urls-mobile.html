@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>📱 URLs Mobile - Heresse PWA</title>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: #10b981;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 1.8rem;
+    }
+    
+    .info-card {
+      background: #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      border-left: 4px solid #10b981;
+    }
+    
+    .url-card {
+      background: #1f2937;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      border: 1px solid #374151;
+    }
+    
+    .url-title {
+      color: #60a5fa;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .url-link {
+      background: #111827;
+      padding: 10px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 14px;
+      color: #10b981;
+      word-break: break-all;
+      margin: 8px 0;
+      border: 1px dashed #374151;
+    }
+    
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    .status.working { background: #065f46; color: #10b981; }
+    .status.testing { background: #92400e; color: #f59e0b; }
+    .status.broken { background: #7f1d1d; color: #ef4444; }
+    
+    .qr-placeholder {
+      background: #374151;
+      border: 2px dashed #6b7280;
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      color: #9ca3af;
+      margin: 15px 0;
+    }
+    
+    .instructions {
+      background: #1e40af;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    .instructions h3 {
+      margin: 0 0 10px 0;
+      color: #dbeafe;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📱 URLs Mobile Test</h1>
+    
+    <div class="instructions">
+      <h3>📋 Instructions</h3>
+      <p>1. Connectez votre mobile au <strong>même WiFi</strong> que cet ordinateur</p>
+      <p>2. Ouvrez Safari sur votre mobile</p>
+      <p>3. Tapez ou scannez une des URLs ci-dessous</p>
+      <p>4. Testez dans l'ordre pour identifier le problème</p>
+    </div>
+    
+    <div class="info-card">
+      <h2 style="color: #60a5fa; margin-bottom: 15px;">🌐 Adresse IP du Serveur</h2>
+      <div class="url-link" style="font-size: 18px; text-align: center;">
+        10.0.0.180:5174
+      </div>
+      <p style="color: #9ca3af; text-align: center; margin: 10px 0;">
+        Serveur Vite en cours d'exécution ✅
+      </p>
+    </div>
+    
+    <div class="url-card">
+      <div class="url-title">✅ App d'Urgence (Fonctionne)</div>
+      <div class="url-link">http://10.0.0.180:5174/</div>
+      <span class="status working">WORKING</span>
+      <p style="color: #9ca3af; font-size: 14px; margin: 8px 0;">
+        Version simple React qui fonctionne sur mobile
+      </p>
+    </div>
+    
+    <div class="url-card">
+      <div class="url-title">📊 Tests Progressifs</div>
+      <div class="url-link">http://10.0.0.180:5174/tests-progressifs.html</div>
+      <span class="status testing">TESTING</span>
+      <p style="color: #9ca3af; font-size: 14px; margin: 8px 0;">
+        Interface de navigation entre tous les tests
+      </p>
+    </div>
+    
+    <div class="url-card">
+      <div class="url-title">🔧 Test Router</div>
+      <div class="url-link">http://10.0.0.180:5174/etape1-router.html</div>
+      <span class="status testing">TESTING</span>
+      <p style="color: #9ca3af; font-size: 14px; margin: 8px 0;">
+        Test React Router (navigation)
+      </p>
+    </div>
+    
+    <div class="url-card">
+      <div class="url-title">🎨 Test CSS</div>
+      <div class="url-link">http://10.0.0.180:5174/etape2-css.html</div>
+      <span class="status testing">TESTING</span>
+      <p style="color: #9ca3af; font-size: 14px; margin: 8px 0;">
+        Test CSS et Tailwind
+      </p>
+    </div>
+    
+    <div class="url-card">
+      <div class="url-title">📱 Diagnostic Mobile</div>
+      <div class="url-link">http://10.0.0.180:5174/mobile-diagnostic.html</div>
+      <span class="status testing">TESTING</span>
+      <p style="color: #9ca3af; font-size: 14px; margin: 8px 0;">
+        Diagnostic HTML pur (sans React)
+      </p>
+    </div>
+    
+    <div class="info-card" style="border-left-color: #f59e0b;">
+      <h3 style="color: #f59e0b; margin-bottom: 15px;">⚡ Test Rapide</h3>
+      <p style="margin-bottom: 15px;">
+        Commencez par tester l'<strong>App d'Urgence</strong> qui fonctionne déjà :
+      </p>
+      <div class="url-link" style="font-size: 16px; text-align: center; color: #f59e0b;">
+        http://10.0.0.180:5174/
+      </div>
+      <p style="color: #9ca3af; font-size: 14px; margin-top: 15px;">
+        Si cette URL fonctionne, le serveur est accessible depuis votre mobile !
+      </p>
+    </div>
+    
+    <div class="qr-placeholder">
+      📱 QR Code ici<br>
+      <small>(Utilisez un générateur QR en ligne avec l'URL ci-dessus)</small>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+      <button 
+        onclick="location.reload()"
+        style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;"
+      >
+        🔄 Rafraîchir
+      </button>
+    </div>
+  </div>
+
+  <script>
+    console.log('📱 Page URLs Mobile chargée');
+    console.log('IP Serveur: 10.0.0.180:5174');
+    console.log('Testez dans l\'ordre: Urgence → Tests Progressifs → Router → CSS');
+  </script>
+</body>
+</html>

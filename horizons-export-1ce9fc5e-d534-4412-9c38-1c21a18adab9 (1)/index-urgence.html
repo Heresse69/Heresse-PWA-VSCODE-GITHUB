@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>🚨 URGENCE - Heresse App</title>
+    
+    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+    <meta name="theme-color" content="#1a1a1a" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        #root {
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        /* Loading fallback */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #333;
+            border-top: 4px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <!-- Fallback pendant le chargement -->
+        <div class="loading">
+            <div class="spinner"></div>
+            <h1 style="color: #10b981; margin-bottom: 20px;">🚨 Urgence App</h1>
+            <p style="color: #9ca3af;">Chargement de l'application d'urgence...</p>
+            <div id="loading-info" style="background: #333; padding: 15px; border-radius: 8px; margin: 20px 0; font-family: monospace; font-size: 12px; text-align: left;">
+                [INFO] Initialisation...<br>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Logger simple
+        const loadingInfo = document.getElementById('loading-info');
+        const addInfo = (message) => {
+            const time = new Date().toLocaleTimeString();
+            loadingInfo.innerHTML += `[${time}] ${message}<br>`;
+        };
+        
+        // Infos de base
+        addInfo(`Screen: ${screen.width}x${screen.height}`);
+        addInfo(`Viewport: ${window.innerWidth}x${window.innerHeight}`);
+        addInfo(`User Agent: ${navigator.userAgent.substring(0, 30)}...`);
+        addInfo('Chargement React...');
+        
+        // Capturer les erreurs
+        window.addEventListener('error', (e) => {
+            addInfo(`❌ ERREUR: ${e.message}`);
+            console.error('Error:', e);
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            addInfo(`❌ PROMISE: ${e.reason}`);
+            console.error('Promise rejection:', e);
+        });
+        
+        // Timeout si React ne charge pas
+        setTimeout(() => {
+            if (document.querySelector('.loading')) {
+                addInfo('⚠️ React prend du temps...');
+                
+                setTimeout(() => {
+                    addInfo('❌ React a échoué - Mode HTML pur');
+                    document.getElementById('root').innerHTML = `
+                        <div style="padding: 20px; text-align: center; min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+                            <h1 style="color: #ef4444; margin-bottom: 20px;">❌ React a échoué</h1>
+                            <p style="color: #9ca3af; margin-bottom: 20px;">L'application fonctionne en mode HTML pur</p>
+                            <button onclick="window.location.reload()" style="background: #10b981; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; cursor: pointer;">
+                                🔄 Recharger
+                            </button>
+                        </div>
+                    `;
+                }, 5000);
+            }
+        }, 3000);
+    </script>
+
+    <!-- Script React d'urgence -->
+    <script type="module" src="/src/main-urgence.jsx"></script>
+</body>
+</html>

@@ -14,8 +14,8 @@ export { swipesService } from './swipes.js';
 export { matchesService } from './matches.js';
 export { messagesService } from './messages.js';
 
-// Types TypeScript (si utilisés)
-export type * from './client.js';
+// Types TypeScript (si utilisés) - commentés car fichier .js
+// export type * from './client.js';
 
 // Helpers pour l'intégration
 export const supabaseServices = {

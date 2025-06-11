@@ -24,6 +24,7 @@ import { UserProvider } from '@/contexts/UserContext';
 import CreateStoryPage from '@/pages/CreateStoryPage';
 import ViewStoryPage from '@/pages/ViewStoryPage';
 import KycPage from '@/pages/KycPage';
+import SupabaseValidationTest from '@/pages/SupabaseValidationTest';
 import { initializeUserDatabase, getUserById, updateUserKycStatus } from '@/utils/userDatabase';
 
 const AppContent = () => {
@@ -152,6 +153,7 @@ const AppContent = () => {
           <Route path="/premium" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><PremiumModesPage /></ProtectedRoute>} />
           <Route path="/stories/create" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><CreateStoryPage /></ProtectedRoute>} />
           <Route path="/stories/:storyId" element={<ProtectedRoute isAuthenticated={isAuthenticated} isKycComplete={isKycComplete}><ViewStoryPage /></ProtectedRoute>} />
+          <Route path="/test-supabase" element={<SupabaseValidationTest />} />
         </Route>
         
         <Route path="*" element={<Navigate to={isAuthenticated ? (isKycComplete ? "/" : "/kyc") : "/landing"} replace />} />

@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-    import { supabase } from '../services/supabase/client.js';
-    import { authService } from '../services/supabase/auth.js';
-    import { profilesService } from '../services/supabase/profiles.js';
+    import { supabase } from '@/services/supabase/client.js';
+    import { authService } from '@/services/supabase/auth.js';
+    import { profilesService } from '@/services/supabase/profiles.js';
     import { 
         initialProfilePhotos, 
         initialPrivateGalleryItems, 

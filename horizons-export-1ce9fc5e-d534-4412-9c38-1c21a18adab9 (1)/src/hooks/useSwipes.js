@@ -2,8 +2,8 @@
  * Hook personnalisé pour la gestion des swipes
  */
 import { useState, useEffect, useCallback } from 'react';
-import { swipesService } from '../services/supabase/swipes.js';
-import { matchesService } from '../services/supabase/matches.js';
+import { swipesService } from '@/services/supabase/swipes.js';
+import { matchesService } from '@/services/supabase/matches.js';
 
 export const useSwipes = () => {
   const [profiles, setProfiles] = useState([]);
