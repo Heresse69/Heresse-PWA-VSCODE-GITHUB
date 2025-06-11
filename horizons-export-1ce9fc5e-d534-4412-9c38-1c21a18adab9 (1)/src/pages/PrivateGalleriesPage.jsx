@@ -35,7 +35,7 @@ import React, { useState, useEffect, useCallback } from 'react';
             alt={gallery.name || 'Couverture de la galerie'} 
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
             src={gallery.cover_image_url || 'https://source.unsplash.com/random/400x300/?abstract,gallery&sig=' + gallery.id} 
-           src="https://images.unsplash.com/photo-1561490497-43bc900ac2d8" />
+           />
           {!isUnlocked && <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-3 flex flex-col justify-end">
             <div className="flex items-center mb-1">
@@ -321,7 +321,7 @@ import React, { useState, useEffect, useCallback } from 'react';
                         </DialogDescription>
                     </DialogHeader>
                     <div className="p-4 text-center">
-                        <img  src={galleryToUnlock?.cover_image_url || 'https://source.unsplash.com/random/400x300/?abstract,cover&sig=dialog' + galleryToUnlock?.id} alt="Couverture de la galerie" className="w-full aspect-video object-cover rounded-md blur-sm opacity-60 mb-3"  src="https://images.unsplash.com/photo-1591298607671-9afec14e39b5" />
+                        <img  src={galleryToUnlock?.cover_image_url || 'https://source.unsplash.com/random/400x300/?abstract,cover&sig=dialog' + galleryToUnlock?.id} alt="Couverture de la galerie" className="w-full aspect-video object-cover rounded-md blur-sm opacity-60 mb-3" />
                         <p className="text-2xl font-bold text-primary mb-1">{galleryToUnlock?.price?.toFixed(2)}€</p>
                         <p className="text-xs text-gray-400 mb-4">Solde actuel: <span className="font-bold text-white">{currentUser?.walletBalance?.toFixed(2)}€</span></p>
                         

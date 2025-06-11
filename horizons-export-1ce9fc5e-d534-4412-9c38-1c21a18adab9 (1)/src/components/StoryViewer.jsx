@@ -9,13 +9,52 @@ const StoryViewer = ({ stories = [], initialIndex = 0, onClose }) => {
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef(null);
+  const storyContainerRef = useRef(null);
 
   const currentStory = stories[currentStoryIndex];
   const totalSegments = currentStory?.segments?.length || 1;
   
   const currentSegment = currentStory?.segments?.[currentSegmentIndex] || {
     type: 'image',
-    url: currentStory?.url,
+    url: currentStory?.imageUrl || currentStory?.userAvatar,
+  };
+
+  // Gestionnaire pour les gestes tactiles
+  const handleTouchStart = useRef({ x: 0, y: 0 });
+  const handleTouchEnd = useRef({ x: 0, y: 0 });
+
+  const onTouchStart = (e) => {
+    handleTouchStart.current.x = e.touches[0].clientX;
+    handleTouchStart.current.y = e.touches[0].clientY;
+  };
+
+  const onTouchEnd = (e) => {
+    handleTouchEnd.current.x = e.changedTouches[0].clientX;
+    handleTouchEnd.current.y = e.changedTouches[0].clientY;
+    
+    const deltaX = handleTouchEnd.current.x - handleTouchStart.current.x;
+    const deltaY = handleTouchEnd.current.y - handleTouchStart.current.y;
+    
+    // Swipe vers le bas pour fermer
+    if (deltaY > 100 && Math.abs(deltaX) < 50) {
+      onClose();
+      return;
+    }
+    
+    // Tap gauche/droite pour navigation
+    if (Math.abs(deltaY) < 50 && Math.abs(deltaX) < 30) {
+      const rect = storyContainerRef.current?.getBoundingClientRect();
+      if (rect) {
+        const tapX = handleTouchEnd.current.x - rect.left;
+        const centerX = rect.width / 2;
+        
+        if (tapX < centerX) {
+          goToPrev();
+        } else {
+          goToNext();
+        }
+      }
+    }
   };
 
   // Timer simple qui fonctionne
@@ -92,6 +131,17 @@ const StoryViewer = ({ stories = [], initialIndex = 0, onClose }) => {
     }
   };
 
+  // Empêcher le scroll en arrière-plan
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('story-viewer-open');
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.body.classList.remove('story-viewer-open');
+    };
+  }, []);
+
   if (!currentStory) return null;
 
   return (
@@ -100,34 +150,62 @@ const StoryViewer = ({ stories = [], initialIndex = 0, onClose }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black z-50 flex flex-col"
+        className="fixed inset-0 bg-black z-[9999] flex flex-col"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 9999,
+        }}
+        ref={storyContainerRef}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
         onClick={handleClick}
       >
-        {/* Espace pour l'encoche */}
-        <div className="h-[100px] bg-black" />
+        {/* Header noir pour masquer l'encoche */}
+        <div 
+          className="bg-black w-full flex-shrink-0"
+          style={{
+            height: 'env(safe-area-inset-top)',
+            minHeight: '44px'
+          }}
+        />
         
         {/* Barres de progression */}
-        <div className="absolute top-8 left-4 right-4 z-10">
-          <div className="flex space-x-1">
-            {Array.from({ length: totalSegments }).map((_, index) => (
-              <div key={index} className="flex-1 h-1 bg-white/30 rounded-full">
-                <div
-                  className="h-full bg-white rounded-full"
-                  style={{
-                    width: index < currentSegmentIndex ? '100%' : 
-                           index === currentSegmentIndex ? `${progress}%` : '0%'
-                  }}
-                />
-              </div>
-            ))}
-          </div>
+        <div 
+          className="absolute left-4 right-4 z-[10002] flex gap-1"
+          style={{
+            top: 'calc(env(safe-area-inset-top) + 0.5rem)',
+            marginTop: '44px'
+          }}
+        >
+          {Array.from({ length: totalSegments }).map((_, index) => (
+            <div key={index} className="flex-1 h-0.5 bg-white/30 rounded-full">
+              <div
+                className="h-full bg-white rounded-full transition-all duration-100 ease-linear"
+                style={{
+                  width: index < currentSegmentIndex ? '100%' : 
+                         index === currentSegmentIndex ? `${progress}%` : '0%'
+                }}
+              />
+            </div>
+          ))}
         </div>
 
-        {/* Header */}
-        <div className="absolute top-12 left-4 right-4 z-10 flex items-center justify-between">
+        {/* Header avec info utilisateur */}
+        <div 
+          className="absolute left-4 right-4 z-[10002] flex items-center justify-between text-white"
+          style={{
+            top: 'calc(env(safe-area-inset-top) + 2.5rem)',
+            marginTop: '44px'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center space-x-3">
             <Avatar className="w-8 h-8 border-2 border-white">
-              <AvatarImage src={currentStory.url} alt={currentStory.userName} />
+              <AvatarImage src={currentStory.userAvatar} alt={currentStory.userName} />
               <AvatarFallback className="bg-slate-600 text-white text-sm">
                 {currentStory.userName?.substring(0, 1)}
               </AvatarFallback>
@@ -148,25 +226,46 @@ const StoryViewer = ({ stories = [], initialIndex = 0, onClose }) => {
           </button>
         </div>
 
-        {/* Contenu */}
-        <div className="flex-1 flex items-center justify-center p-4">
+        {/* Contenu principal - image/vidéo */}
+        <div className="flex-1 flex items-center justify-center px-4 relative">
           <img
             src={currentSegment.url}
             alt={`Story de ${currentStory.userName}`}
-            className="max-w-full max-h-full object-contain"
+            className="max-w-full max-h-full object-contain rounded-lg"
             draggable={false}
             onError={(e) => {
               console.error('Erreur de chargement image story:', currentSegment.url);
-              // Image de fallback si l'image ne charge pas
-              e.target.src = `https://picsum.photos/400/600?random=${currentStory.userId + currentSegmentIndex}`;
+              e.target.src = `https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=600&fit=crop&crop=face`;
             }}
           />
         </div>
 
-        {/* Zones de clic */}
-        <div className="absolute top-20 left-0 right-0 bottom-0 flex">
-          <div className="w-1/2" onClick={(e) => { e.stopPropagation(); goToPrev(); }} />
-          <div className="w-1/2" onClick={(e) => { e.stopPropagation(); goToNext(); }} />
+        {/* Zones de navigation invisibles */}
+        <div className="absolute inset-0 flex" style={{ marginTop: '120px' }}>
+          <div 
+            className="w-1/2 h-full flex items-center justify-start pl-4"
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              goToPrev(); 
+            }}
+          >
+            <ChevronLeft 
+              size={32} 
+              className="text-white/50 hover:text-white/80 transition-colors pointer-events-none" 
+            />
+          </div>
+          <div 
+            className="w-1/2 h-full flex items-center justify-end pr-4"
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              goToNext(); 
+            }}
+          >
+            <ChevronRight 
+              size={32} 
+              className="text-white/50 hover:text-white/80 transition-colors pointer-events-none" 
+            />
+          </div>
         </div>
 
         {/* Indicateur de pause */}
@@ -178,6 +277,15 @@ const StoryViewer = ({ stories = [], initialIndex = 0, onClose }) => {
             </div>
           </div>
         )}
+
+        {/* Footer pour safe area */}
+        <div 
+          className="bg-black w-full flex-shrink-0"
+          style={{
+            height: 'env(safe-area-inset-bottom)',
+            minHeight: '34px'
+          }}
+        />
       </motion.div>
     </AnimatePresence>
   );

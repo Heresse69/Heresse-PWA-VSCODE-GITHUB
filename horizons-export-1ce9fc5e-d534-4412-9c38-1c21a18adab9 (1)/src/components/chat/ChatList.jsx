@@ -16,8 +16,13 @@ import React from 'react';
           </div>
 
       <div
-        className="flex-grow overflow-y-auto px-4 pb-4 pt-2 space-y-1"
-        style={{ height: `calc(100% - 60px)` }}
+        className="flex-1 overflow-y-auto px-4 pb-4 pt-2 space-y-1 scrollable"
+        data-scrollable="true"
+        style={{ 
+          overflowY: 'scroll',
+          WebkitOverflowScrolling: 'touch',
+          height: 'auto'
+        }}
       >
         {matches.length === 0 && !searchTerm && (
           <div className="flex-grow flex flex-col items-center justify-center text-gray-400 pt-10">

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Debug Mobile - PWA</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .status {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .error {
+            background: rgba(255,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 12px;
+            text-align: left;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug Mobile PWA</h1>
+        
+        <div class="status">
+            <h3>Informations Appareil</h3>
+            <div id="device-info">Chargement...</div>
+        </div>
+        
+        <div class="status">
+            <h3>Mode PWA</h3>
+            <div id="pwa-status">Vérification...</div>
+        </div>
+        
+        <div class="status">
+            <h3>Test JavaScript</h3>
+            <div id="js-status">Test en cours...</div>
+        </div>
+        
+        <div id="errors" style="display: none;">
+            <h3>Erreurs Détectées:</h3>
+        </div>
+        
+        <button onclick="testFetch()">Test Réseau</button>
+        <button onclick="testLocalStorage()">Test LocalStorage</button>
+        <button onclick="location.reload()">Actualiser</button>
+        
+        <div class="status">
+            <h3>Console Logs</h3>
+            <div id="console-output"></div>
+        </div>
+    </div>
+
+    <script>
+        // Capture des erreurs JavaScript
+        const errors = [];
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        
+        window.onerror = function(msg, url, line, col, error) {
+            const errorMsg = `Erreur: ${msg} (Ligne ${line})`;
+            errors.push(errorMsg);
+            showError(errorMsg);
+            return false;
+        };
+        
+        window.addEventListener('unhandledrejection', function(event) {
+            const errorMsg = `Promise rejetée: ${event.reason}`;
+            errors.push(errorMsg);
+            showError(errorMsg);
+        });
+        
+        // Override console pour capturer les logs
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            const output = document.getElementById('console-output');
+            if (output) {
+                output.innerHTML += `<div>LOG: ${args.join(' ')}</div>`;
+            }
+        };
+        
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            const errorMsg = `ERROR: ${args.join(' ')}`;
+            errors.push(errorMsg);
+            showError(errorMsg);
+        };
+        
+        function showError(errorMsg) {
+            const errorsDiv = document.getElementById('errors');
+            errorsDiv.style.display = 'block';
+            errorsDiv.innerHTML += `<div class="error">${errorMsg}</div>`;
+        }
+        
+        function updateDeviceInfo() {
+            try {
+                const info = {
+                    userAgent: navigator.userAgent,
+                    screen: `${screen.width}x${screen.height}`,
+                    viewport: `${window.innerWidth}x${window.innerHeight}`,
+                    pixelRatio: window.devicePixelRatio,
+                    platform: navigator.platform,
+                    language: navigator.language,
+                    cookieEnabled: navigator.cookieEnabled,
+                    onLine: navigator.onLine
+                };
+                
+                document.getElementById('device-info').innerHTML = 
+                    Object.entries(info).map(([key, value]) => 
+                        `<div><strong>${key}:</strong> ${value}</div>`
+                    ).join('');
+                    
+                console.log('Device info updated successfully');
+            } catch (error) {
+                console.error('Erreur device info:', error);
+            }
+        }
+        
+        function checkPWAStatus() {
+            try {
+                const isStandalone = window.navigator.standalone || 
+                                   window.matchMedia('(display-mode: standalone)').matches ||
+                                   window.matchMedia('(display-mode: fullscreen)').matches;
+                
+                const pwaInfo = {
+                    standalone: isStandalone,
+                    displayMode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
+                    serviceWorker: 'serviceWorker' in navigator,
+                    manifest: document.querySelector('link[rel="manifest"]') !== null
+                };
+                
+                document.getElementById('pwa-status').innerHTML = 
+                    Object.entries(pwaInfo).map(([key, value]) => 
+                        `<div><strong>${key}:</strong> ${value}</div>`
+                    ).join('');
+                    
+                console.log('PWA status checked successfully');
+            } catch (error) {
+                console.error('Erreur PWA status:', error);
+            }
+        }
+        
+        function testJavaScript() {
+            try {
+                // Test des fonctionnalités JS basiques
+                const tests = {
+                    'ES6 Arrow Functions': () => [1,2,3].map(x => x * 2),
+                    'Promise': () => Promise.resolve('OK'),
+                    'Fetch API': () => typeof fetch !== 'undefined',
+                    'LocalStorage': () => typeof localStorage !== 'undefined',
+                    'Session Storage': () => typeof sessionStorage !== 'undefined',
+                    'JSON': () => JSON.stringify({test: true}),
+                    'Date': () => new Date().getTime(),
+                    'Array.from': () => Array.from([1,2,3])
+                };
+                
+                const results = {};
+                Object.entries(tests).forEach(([name, test]) => {
+                    try {
+                        test();
+                        results[name] = '✅ OK';
+                    } catch (e) {
+                        results[name] = `❌ ${e.message}`;
+                    }
+                });
+                
+                document.getElementById('js-status').innerHTML = 
+                    Object.entries(results).map(([key, value]) => 
+                        `<div><strong>${key}:</strong> ${value}</div>`
+                    ).join('');
+                    
+                console.log('JavaScript tests completed');
+            } catch (error) {
+                console.error('Erreur JS tests:', error);
+            }
+        }
+        
+        function testFetch() {
+            try {
+                fetch('/manifest.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Fetch test réussi:', data);
+                        alert('Test réseau réussi!');
+                    })
+                    .catch(error => {
+                        console.error('Fetch test échoué:', error);
+                        alert('Test réseau échoué: ' + error.message);
+                    });
+            } catch (error) {
+                console.error('Erreur test fetch:', error);
+                alert('Erreur test fetch: ' + error.message);
+            }
+        }
+        
+        function testLocalStorage() {
+            try {
+                localStorage.setItem('test', 'value');
+                const value = localStorage.getItem('test');
+                localStorage.removeItem('test');
+                console.log('LocalStorage test réussi');
+                alert('LocalStorage fonctionne!');
+            } catch (error) {
+                console.error('LocalStorage test échoué:', error);
+                alert('LocalStorage échoué: ' + error.message);
+            }
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            updateDeviceInfo();
+            checkPWAStatus();
+            testJavaScript();
+        });
+        
+        console.log('Debug script loaded successfully');
+    </script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🔍 Debug Pseudo-éléments - Heresse PWA</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .status {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: left;
+        }
+        
+        .result {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug Pseudo-éléments</h1>
+        <p>Diagnostic des pseudo-éléments dans l'app Heresse PWA</p>
+        
+        <button onclick="checkPseudoElements()">🔍 Chercher pseudo-éléments</button>
+        <button onclick="openPWAApp()">📱 Ouvrir l'app PWA</button>
+        
+        <div class="status">
+            <h3>🎯 Pseudo-éléments détectés</h3>
+            <div id="pseudo-results">Cliquez sur le bouton pour analyser...</div>
+        </div>
+        
+        <div class="status">
+            <h3>📐 Informations Viewport</h3>
+            <div id="viewport-info">Chargement...</div>
+        </div>
+        
+        <div class="status">
+            <h3>🔧 Mode PWA</h3>
+            <div id="pwa-status">Vérification...</div>
+        </div>
+    </div>
+
+    <script>
+        function checkPseudoElements() {
+            const results = [];
+            
+            // Chercher tous les éléments et vérifier leurs pseudo-éléments
+            const allElements = document.querySelectorAll('*');
+            
+            allElements.forEach((element, index) => {
+                if (index > 100) return; // Limiter pour les performances
+                
+                // Vérifier ::after
+                const afterStyle = window.getComputedStyle(element, '::after');
+                if (afterStyle.content !== 'none' && afterStyle.content !== '""' && afterStyle.content !== '') {
+                    results.push({
+                        element: element.tagName + (element.className ? '.' + element.className.split(' ').join('.') : ''),
+                        pseudo: '::after',
+                        content: afterStyle.content,
+                        display: afterStyle.display,
+                        position: afterStyle.position,
+                        height: afterStyle.height,
+                        width: afterStyle.width
+                    });
+                }
+                
+                // Vérifier ::before
+                const beforeStyle = window.getComputedStyle(element, '::before');
+                if (beforeStyle.content !== 'none' && beforeStyle.content !== '""' && beforeStyle.content !== '') {
+                    results.push({
+                        element: element.tagName + (element.className ? '.' + element.className.split(' ').join('.') : ''),
+                        pseudo: '::before',
+                        content: beforeStyle.content,
+                        display: beforeStyle.display,
+                        position: beforeStyle.position,
+                        height: beforeStyle.height,
+                        width: beforeStyle.width
+                    });
+                }
+            });
+            
+            const resultsDiv = document.getElementById('pseudo-results');
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '✅ Aucun pseudo-élément visible détecté !';
+            } else {
+                resultsDiv.innerHTML = `❌ ${results.length} pseudo-élément(s) détecté(s):<br><br>` + 
+                    results.map(r => 
+                        `<strong>${r.element}${r.pseudo}</strong><br>` +
+                        `  Content: ${r.content}<br>` +
+                        `  Display: ${r.display}<br>` +
+                        `  Position: ${r.position}<br>` +
+                        `  Size: ${r.width} × ${r.height}<br><br>`
+                    ).join('');
+            }
+        }
+        
+        function openPWAApp() {
+            window.open('./dist-mobile-test/index.html', '_blank');
+        }
+        
+        // Informations viewport
+        function updateViewportInfo() {
+            const info = {
+                'Window Size': `${window.innerWidth} × ${window.innerHeight}`,
+                'Screen Size': `${screen.width} × ${screen.height}`,
+                'Device Pixel Ratio': window.devicePixelRatio,
+                'Orientation': screen.orientation ? screen.orientation.angle : 'Unknown',
+                'Safe Area Top': getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top') || 'N/A',
+                'Safe Area Bottom': getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-bottom') || 'N/A'
+            };
+            
+            document.getElementById('viewport-info').innerHTML = 
+                Object.entries(info).map(([key, value]) => `<strong>${key}:</strong> ${value}`).join('<br>');
+        }
+        
+        // Vérifier le mode PWA
+        function updatePWAStatus() {
+            const isPWA = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+            const status = isPWA ? '✅ Mode PWA Actif' : '❌ Mode Browser Normal';
+            document.getElementById('pwa-status').innerHTML = status;
+        }
+        
+        // Initialiser
+        updateViewportInfo();
+        updatePWAStatus();
+        
+        // Actualiser lors du redimensionnement
+        window.addEventListener('resize', updateViewportInfo);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateViewportInfo, 100);
+        });
+    </script>
+</body>
+</html>

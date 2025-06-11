@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mobile Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            padding: 20px;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #333;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff69b4;
+        }
+        button {
+            background: #ff69b4;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin: 8px 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            max-width: 200px;
+        }
+        .result {
+            background: #222;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+        .info { color: #60a5fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>📱 Test Mobile Ultra-Simple</h1>
+            <p><strong>Status:</strong> <span id="status" class="success">✅ HTML chargé avec succès</span></p>
+            <p><strong>URL:</strong> <span id="current-url"></span></p>
+        </div>
+
+        <div class="card">
+            <h3>🔍 Informations Appareil</h3>
+            <div id="device-info">Chargement...</div>
+        </div>
+
+        <div class="card">
+            <h3>🧪 Tests de Base</h3>
+            <button onclick="testJavaScript()">Test JavaScript</button>
+            <button onclick="testFetch()">Test Fetch API</button>
+            <button onclick="testLocalStorage()">Test LocalStorage</button>
+            <button onclick="testHeresseApp()">Test App Heresse</button>
+        </div>
+
+        <div class="card">
+            <h3>📊 Résultats</h3>
+            <div id="results" class="result">Prêt pour les tests...\n</div>
+        </div>
+
+        <div class="card">
+            <h3>🚀 Actions Rapides</h3>
+            <button onclick="goToMainApp()">Aller à l'App Principale</button>
+            <button onclick="reloadPage()">Recharger la Page</button>
+            <button onclick="clearResults()">Effacer les Résultats</button>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let logCount = 0;
+
+        // Fonction de log
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = {
+                'success': '✅',
+                'error': '❌', 
+                'warning': '⚠️',
+                'info': 'ℹ️'
+            }[type] || 'ℹ️';
+            
+            logCount++;
+            const line = `[${timestamp}] ${icon} ${message}\n`;
+            results.textContent += line;
+            results.scrollTop = results.scrollHeight;
+
+            // Limiter à 50 lignes
+            if (logCount > 50) {
+                const lines = results.textContent.split('\n');
+                results.textContent = lines.slice(-45).join('\n');
+                logCount = 45;
+            }
+        }
+
+        // Initialisation
+        function init() {
+            try {
+                // URL actuelle
+                document.getElementById('current-url').textContent = window.location.href;
+
+                // Informations appareil
+                const deviceInfo = {
+                    'User Agent': navigator.userAgent.substring(0, 100) + '...',
+                    'Platform': navigator.platform,
+                    'Language': navigator.language,
+                    'Online': navigator.onLine ? 'Oui' : 'Non',
+                    'Screen': `${screen.width}x${screen.height}`,
+                    'Viewport': `${window.innerWidth}x${window.innerHeight}`,
+                    'Pixel Ratio': window.devicePixelRatio,
+                    'Touch Support': 'ontouchstart' in window ? 'Oui' : 'Non',
+                    'PWA Mode': (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) ? 'Oui' : 'Non'
+                };
+
+                let infoHTML = '';
+                for (const [key, value] of Object.entries(deviceInfo)) {
+                    infoHTML += `<strong>${key}:</strong> ${value}<br>`;
+                }
+                document.getElementById('device-info').innerHTML = infoHTML;
+
+                log('Page initialisée avec succès', 'success');
+                log(`Appareil détecté: ${navigator.platform}`, 'info');
+                log(`Résolution: ${screen.width}x${screen.height}`, 'info');
+
+            } catch (error) {
+                log(`Erreur lors de l'initialisation: ${error.message}`, 'error');
+            }
+        }
+
+        // Tests
+        function testJavaScript() {
+            try {
+                // Test des fonctionnalités JS de base
+                const tests = [
+                    () => Array.from([1,2,3]).map(x => x*2),
+                    () => Promise.resolve('OK'),
+                    () => new Date().toISOString(),
+                    () => JSON.stringify({test: true}),
+                    () => localStorage.setItem('test', 'value')
+                ];
+
+                let passed = 0;
+                for (let i = 0; i < tests.length; i++) {
+                    try {
+                        tests[i]();
+                        passed++;
+                    } catch (e) {
+                        log(`Test JS ${i+1} échoué: ${e.message}`, 'error');
+                    }
+                }
+
+                log(`JavaScript: ${passed}/${tests.length} tests réussis`, passed === tests.length ? 'success' : 'warning');
+            } catch (error) {
+                log(`Erreur test JavaScript: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFetch() {
+            try {
+                log('Test Fetch API...', 'info');
+                
+                // Test avec l'URL actuelle
+                const response = await fetch(window.location.href, { 
+                    method: 'HEAD',
+                    cache: 'no-cache'
+                });
+                
+                if (response.ok) {
+                    log(`Fetch API: OK (Status ${response.status})`, 'success');
+                } else {
+                    log(`Fetch API: Erreur ${response.status}`, 'warning');
+                }
+                
+            } catch (error) {
+                log(`Fetch API: Erreur - ${error.message}`, 'error');
+            }
+        }
+
+        function testLocalStorage() {
+            try {
+                const testKey = 'mobile_test_' + Date.now();
+                const testValue = 'test_value_123';
+                
+                localStorage.setItem(testKey, testValue);
+                const retrieved = localStorage.getItem(testKey);
+                localStorage.removeItem(testKey);
+                
+                if (retrieved === testValue) {
+                    log('LocalStorage: OK', 'success');
+                } else {
+                    log('LocalStorage: Valeur incorrecte', 'warning');
+                }
+            } catch (error) {
+                log(`LocalStorage: Erreur - ${error.message}`, 'error');
+            }
+        }
+
+        async function testHeresseApp() {
+            try {
+                log('Test de l\'application Heresse...', 'info');
+                
+                // Test de différentes URLs de l'app
+                const urls = [
+                    '/',
+                    '/manifest.json',
+                    '/mobile-test-app.html'
+                ];
+                
+                for (const url of urls) {
+                    try {
+                        const fullUrl = window.location.origin + url;
+                        const response = await fetch(fullUrl, { method: 'HEAD' });
+                        
+                        if (response.ok) {
+                            log(`${url}: Accessible ✅`, 'success');
+                        } else {
+                            log(`${url}: Erreur ${response.status}`, 'warning');
+                        }
+                    } catch (e) {
+                        log(`${url}: Non accessible - ${e.message}`, 'error');
+                    }
+                }
+                
+                log('Test Heresse terminé', 'info');
+                
+            } catch (error) {
+                log(`Erreur test Heresse: ${error.message}`, 'error');
+            }
+        }
+
+        // Actions
+        function goToMainApp() {
+            log('Redirection vers l\'app principale...', 'info');
+            window.location.href = '/';
+        }
+
+        function reloadPage() {
+            window.location.reload();
+        }
+
+        function clearResults() {
+            document.getElementById('results').textContent = 'Résultats effacés...\n';
+            logCount = 0;
+        }
+
+        // Gestion des erreurs globales
+        window.addEventListener('error', (event) => {
+            log(`Erreur JS: ${event.error?.message || event.message}`, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            log(`Promise rejetée: ${event.reason}`, 'error');
+        });
+
+        // Initialiser au chargement
+        window.addEventListener('DOMContentLoaded', init);
+        
+        // Fallback si DOMContentLoaded a déjà eu lieu
+        if (document.readyState === 'loading') {
+            // Le DOM est encore en train de charger
+        } else {
+            // Le DOM est déjà chargé
+            init();
+        }
+
+        log('Script chargé', 'success');
+    </script>
+</body>
+</html>

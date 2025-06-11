@@ -11,6 +11,7 @@ import MatchAnimationOverlay from '@/components/features/swipe/MatchAnimationOve
 import ActionButtons from '@/components/features/swipe/ActionButtons';
 import { initialMockProfilesData } from '@/data/mockProfiles';
 import { addMatch, createMatchConversation } from '@/data/mockChatData';
+import { usePWA } from '@/hooks/usePWA';
 
 const HomePage = () => {
   const [profiles, setProfiles] = useState([...initialMockProfilesData]);
@@ -22,6 +23,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const isMounted = useRef(true);
   const [isSwiping, setIsSwiping] = useState(false);
+  const { isPWA } = usePWA(); // Détecter le mode PWA
 
   const [showMatchAnimation, setShowMatchAnimation] = useState(false);
   const [matchedProfileData, setMatchedProfileData] = useState(null);
@@ -38,11 +40,11 @@ const HomePage = () => {
     }
   );
 
-
   useEffect(() => {
     isMounted.current = true;
     return () => { isMounted.current = false; };
   }, []);
+  
 
   const handleDragStart = () => {
     if (!isMounted.current) return;
@@ -56,16 +58,14 @@ const HomePage = () => {
     setHistory(prev => [...prev, { profile: swipedProfile, direction }]);
 
     if (direction === 'right') {
-      // Ajouter le profil aux matchs quand on swipe vers la droite
       const matchUser = {
         id: swipedProfile.id,
         name: swipedProfile.name,
-        avatar: swipedProfile.photos[0], // Première photo comme avatar
+        avatar: swipedProfile.photos[0],
         age: swipedProfile.age,
         distance: swipedProfile.distance
       };
       
-      // Ajouter le match ET créer automatiquement la conversation
       const newMatch = addMatch(matchUser);
       const newConversation = createMatchConversation(matchUser);
       
@@ -74,7 +74,6 @@ const HomePage = () => {
     } else if (direction === 'left') {
        toast({ title: "Non merci !", description: `Profil de ${swipedProfile.name} passé.`, duration: 2000, className: "bg-gradient-to-r from-rose-600 to-red-700 border-red-700 text-white shadow-lg" });
     } else if (direction === 'superlike') {
-        // Ajouter aussi le profil aux matchs pour un superlike
         const matchUser = {
           id: swipedProfile.id,
           name: swipedProfile.name,
@@ -83,7 +82,6 @@ const HomePage = () => {
           distance: swipedProfile.distance
         };
         
-        // Ajouter le match ET créer automatiquement la conversation pour superlike aussi
         const newMatch = addMatch(matchUser);
         const newConversation = createMatchConversation(matchUser);
         
@@ -98,7 +96,6 @@ const HomePage = () => {
       motionY.set(0);
     }
   }, [currentIndex, profiles, topCardControls, toast, isMounted, setShowMatchAnimation, setMatchedProfileData, setHistory, motionX, motionY]);
-
 
   const handleDragEnd = useCallback((event, info) => {
     if (!isMounted.current) return;
@@ -123,40 +120,74 @@ const HomePage = () => {
     }
   }, [topCardControls, removeTopCard, isMounted, motionX, motionY]); 
 
-  const triggerSwipe = useCallback((direction) => {
-    if (!isMounted.current || profiles.length === 0 || currentIndex >= profiles.length) return;
-    let targetX = 0;
-    let targetY = 0;
-    let finalRotate = 0;
-    let swipeDirection = direction;
-
-    if (direction === 'left') { targetX = "-150%"; finalRotate = -25; }
-    else if (direction === 'right') { targetX = "150%"; finalRotate = 25; }
-    else if (direction === 'superlike') { targetY = "-150%"; finalRotate = 0; } 
-    else if (direction === 'info') {
-      navigate(`/profile/${profiles[currentIndex].id}`);
-      return;
-    }
+const triggerSwipe = useCallback((direction) => {
+  if (!isMounted.current || profiles.length === 0 || currentIndex >= profiles.length) return;
+  
+  if (direction === 'info') {
+    navigate(`/profile/${profiles[currentIndex].id}`);
+    return;
+  }
+  
+  setIsSwiping(true);
+  
+  // Animation en 2 étapes pour un effet plus fluide
+  if (direction === 'left' || direction === 'right') {
+    const finalX = direction === 'right' ? "120%" : "-120%";
+    const finalRotate = direction === 'right' ? 20 : -20;
     
-    setIsSwiping(true); 
-    if (direction === 'superlike') {
-      topCardControls.start({ y: targetY, opacity: 0, scale: 1.1, transition: { duration: 0.4, ease: "circOut" } })
-        .then(() => { 
-          if(isMounted.current) {
-            removeTopCard(swipeDirection);
+    // Étape 1: Légère inclinaison et petit mouvement (0.08s)
+    topCardControls.start({
+      x: direction === 'right' ? 30 : -30,
+      rotate: direction === 'right' ? 8 : -8,
+      transition: { 
+        duration: 0.16, 
+        ease: "easeOut" 
+      }
+    }).then(() => {
+      // Étape 2: Glissement complet (0.12s)
+      if (isMounted.current) {
+        topCardControls.start({
+          x: finalX,
+          y: 20, // Légère descente pour plus de réalisme
+          rotate: finalRotate,
+          opacity: 0,
+          scale: 0.95,
+          transition: { 
+            duration: 0.24, 
+            ease: "easeIn" 
+          }
+        }).then(() => {
+          if (isMounted.current) {
+            removeTopCard(direction);
             setIsSwiping(false);
           }
         });
-    } else {
-        topCardControls.start({ x: targetX, opacity: 0, rotate: finalRotate, transition: { duration: 0.4, ease: "easeOut" } })
-        .then(() => { 
-          if(isMounted.current) {
-            removeTopCard(swipeDirection);
+      }
+    });
+  } 
+  else if (direction === 'superlike') {
+    // Animation vers le haut pour superlike
+    topCardControls.start({
+      y: -10,
+      scale: 1.05,
+      transition: { duration: 0.25, ease: "easeOut" }
+    }).then(() => {
+      if (isMounted.current) {
+        topCardControls.start({
+          y: "-120%",
+          opacity: 0,
+          scale: 1.2,
+          transition: { duration: 0.34, ease: "easeIn" }
+        }).then(() => {
+          if (isMounted.current) {
+            removeTopCard('superlike');
             setIsSwiping(false);
           }
         });
-    }
-  }, [topCardControls, currentIndex, profiles, removeTopCard, navigate, isMounted]);
+      }
+    });
+  }
+}, [topCardControls, currentIndex, profiles, removeTopCard, navigate, isMounted]);
 
   const handleRewind = () => {
     if (!currentUser || !currentUser.premiumStatus.canRewind || history.length === 0) {
@@ -166,12 +197,10 @@ const HomePage = () => {
     const lastAction = history[history.length - 1];
     const direction = lastAction.direction;
     
-    // Animation inverse avant de restaurer le profil
     const reverseDirection = direction === 'right' ? 'left' : 'right';
     const targetX = reverseDirection === 'right' ? "150%" : "-150%";
     const finalRotate = reverseDirection === 'right' ? 25 : -25;
     
-    // Démarrer l'animation inverse
     topCardControls.set({ 
       x: targetX, 
       y: 0, 
@@ -180,7 +209,6 @@ const HomePage = () => {
       scale: 0.9 
     });
     
-    // Puis animer vers la position normale
     topCardControls.start({ 
       x: 0, 
       y: 0, 
@@ -237,13 +265,13 @@ const HomePage = () => {
   }
 
   return (
-    <div className="relative w-full h-screen flex flex-col bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
+    <div className="homepage-fixed bg-gradient-to-br from-slate-800 to-slate-900">
       {/* Zone principale - carte collée au header global */}
       <div className="flex-1 flex flex-col">
-        <div className="w-full max-w-md aspect-[3/4] relative mx-auto px-2">
+        <div className={`w-full max-w-md ${isPWA ? 'aspect-[3/4.5]' : 'aspect-[3/4]'} relative mx-auto px-2`}>
           <AnimatePresence>
             {/* Afficher jusqu'à 3 cartes en superposition */}
-            {profiles.slice(currentIndex, currentIndex + 3).map((profile, index) => {
+            {profiles.slice(currentIndex, currentIndex + 30).map((profile, index) => {
               if (!profile) return null;
               
               const isTopCard = index === 0;
@@ -277,6 +305,7 @@ const HomePage = () => {
                     isTopCard={isTopCard} 
                     onSwipe={isTopCard ? triggerSwipe : undefined} 
                     isSwiping={isTopCard ? isSwiping : false}
+                    isPWA={isPWA} // Passer l'info PWA au composant
                   />
                 </CardWrapper>
               );
@@ -297,6 +326,7 @@ const HomePage = () => {
                 historyLength={history.length}
                 motionX={motionX}
                 currentUser={currentUser}
+                isPWA={isPWA} // Passer l'info PWA
             />
           </div>
         )}
@@ -310,7 +340,6 @@ const HomePage = () => {
             onClose={() => setShowMatchAnimation(false)}
             onSendMessage={() => {
               setShowMatchAnimation(false);
-              // Rediriger vers la conversation nouvellement créée
               const conversation = createMatchConversation({
                 id: matchedProfileData.id,
                 name: matchedProfileData.name,

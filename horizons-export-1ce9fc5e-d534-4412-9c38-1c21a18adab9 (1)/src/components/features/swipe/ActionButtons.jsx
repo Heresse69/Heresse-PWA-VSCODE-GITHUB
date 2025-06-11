@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 
-const ActionButton = ({ icon: Icon, onClick, disabled, className, motionStyle, ariaLabel }) => (
+const ActionButton = ({ icon: Icon, onClick, disabled, className, motionStyle, ariaLabel, iconSize = 20, strokeWidth = 2 }) => (
   <motion.div style={motionStyle}>
     <Button
       variant="outline"
@@ -23,7 +23,7 @@ const ActionButton = ({ icon: Icon, onClick, disabled, className, motionStyle, a
       disabled={disabled}
       aria-label={ariaLabel}
     >
-      <Icon size={20} />
+      <Icon size={iconSize} strokeWidth={strokeWidth} />
     </Button>
   </motion.div>
 );
@@ -59,16 +59,20 @@ const ActionButtons = ({ onRewind, onSwipe, canRewind, isSwiping, historyLength,
   };
 
   const handleLike = () => {
-    if (isSwiping) return; // Prevent double-clicks during swipe
-    // Déclencher l'animation de swipe vers la droite
+  if (isSwiping) return; // Prevent double-clicks during swipe
+  // Déclencher l'animation de swipe vers la droite avec délai
+  setTimeout(() => {
     onSwipe('right');
-  };
+  }, 50);
+};
 
-  const handleDislike = () => {
-    if (isSwiping) return; // Prevent double-clicks during swipe
-    // Déclencher l'animation de swipe vers la gauche
+const handleDislike = () => {
+  if (isSwiping) return; // Prevent double-clicks during swipe
+  // Déclencher l'animation de swipe vers la gauche avec délai
+  setTimeout(() => {
     onSwipe('left');
-  };
+  }, 50);
+};
 
   const handleToggleIncognito = () => {
     if (isIncognito) {
@@ -85,46 +89,53 @@ const ActionButtons = ({ onRewind, onSwipe, canRewind, isSwiping, historyLength,
 
   return (
     <>
-      <div className="flex justify-center items-center py-3 px-4">
+      <div className="flex justify-center items-center py-0 px-7">
         <div className="flex justify-between items-center gap-4 w-full max-w-sm">
           <ActionButton
             icon={X}
             onClick={handleDislike}
             disabled={isSwiping && motionX.get() > 0}
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-rose-500/80 to-red-600/80 hover:from-rose-500 hover:to-red-600 border-2 border-rose-400/70 text-white shadow-2xl backdrop-blur-md transition-all duration-150 ease-out hover:shadow-rose-500/40 active:scale-95"
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 border-2 border-red-300/80 text-white shadow-2xl backdrop-blur-md transition-all duration-150 ease-out hover:shadow-red-400/60 active:scale-95 hover:scale-105"
             motionStyle={{ 
               opacity: isSwiping ? dislikeOpacity : 1, 
               scale: isSwiping ? dislikeScale : 1,
               rotateZ: isSwiping ? dislikeRotate : 0
             }}
             ariaLabel="Dislike profile"
+            iconSize={26}
+            strokeWidth={4}
           />
           <ActionButton
             icon={Undo}
             onClick={handleRewind}
             disabled={isSwiping}
-            className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 border-yellow-500/80 text-yellow-500 hover:text-yellow-400 shadow-xl backdrop-blur-sm"
+            className="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-500/90 to-amber-600/90 hover:from-yellow-400 hover:to-amber-500 border-2 border-yellow-300/70 text-white shadow-xl backdrop-blur-sm transition-all duration-150 ease-out hover:shadow-yellow-400/50 active:scale-95 hover:scale-105"
             ariaLabel="Rewind last swipe"
           />
           <motion.div>
             <Button
               onClick={handleToggleIncognito}
-              className={`${isIncognito ? 'bg-blue-500' : 'bg-gray-600'} hover:${isIncognito ? 'bg-blue-600' : 'bg-gray-700'} text-white p-2 rounded-full shadow-lg w-14 h-14`}
+              className={`${
+                isIncognito 
+                  ? 'bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-400 hover:to-blue-600 border-2 border-blue-300/80 shadow-blue-400/50' 
+                  : 'bg-gradient-to-br from-gray-600 to-gray-800 hover:from-gray-500 hover:to-gray-700 border-2 border-gray-400/70 shadow-gray-400/40'
+              } text-white p-2 rounded-full shadow-xl w-14 h-14 transition-all duration-150 ease-out hover:scale-105 active:scale-95`}
             >
-              <EyeOff size={18} />
+              <EyeOff size={22} />
             </Button>
           </motion.div>
           <ActionButton
             icon={Heart}
             onClick={handleLike}
             disabled={isSwiping && motionX.get() < 0}
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500/80 to-green-600/80 hover:from-emerald-500 hover:to-green-600 border-2 border-emerald-400/70 text-white shadow-2xl backdrop-blur-md transition-all duration-150 ease-out hover:shadow-emerald-500/40 active:scale-95"
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 hover:from-green-300 hover:to-emerald-500 border-2 border-green-200/80 text-white shadow-2xl backdrop-blur-md transition-all duration-150 ease-out hover:shadow-green-400/60 active:scale-95 hover:scale-105 [&>svg]:fill-white [&>svg]:stroke-none"
             motionStyle={{ 
               opacity: isSwiping ? likeOpacity : 1, 
               scale: isSwiping ? likeScale : 1,
               rotateZ: isSwiping ? likeRotate : 0
             }}
             ariaLabel="Like profile"
+            iconSize={26}
           />
         </div>
       </div>
@@ -153,7 +164,7 @@ const ActionButtons = ({ onRewind, onSwipe, canRewind, isSwiping, historyLength,
               }}
               className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-none text-sm py-2"
             >
-              Premium
+              Souscrire
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -165,7 +176,7 @@ const ActionButtons = ({ onRewind, onSwipe, canRewind, isSwiping, historyLength,
           <DialogHeader>
             <DialogTitle className="text-center text-lg font-bold">Désactiver Incognito</DialogTitle>
             <DialogDescription className="text-center text-gray-300 text-sm">
-              Êtes-vous sûr(e) de vouloir désactiver le mode incognito ?
+              Êtes-vous sûr(e) de vouloir désactiver le mode incognito ? Tout les utilisateurs pourront voir votre profil
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 mt-3">
@@ -173,7 +184,7 @@ const ActionButtons = ({ onRewind, onSwipe, canRewind, isSwiping, historyLength,
               onClick={() => confirmDisableIncognito(false)}
               className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-sm py-2"
             >
-              Non
+              Annuler
             </Button>
             <Button 
               onClick={() => confirmDisableIncognito(true)} 

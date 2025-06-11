@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useUser } from '@/contexts/UserContext'; 
 import { getConversations } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
-import StoriesSection from '@/components/StoriesSection';
+import StoryContainer from '../components/StoryContainer';
 
 const ChatCard = ({ chat, index }) => {
   const formatTimestamp = (timestamp) => {
@@ -103,9 +103,13 @@ const ChatPage = () => {
     setAvailableStories(stories);
   };
 
-  const openStoryViewer = (storyIndex) => {
+  const openStoryViewer = (storyIndex, orderedStories = null) => {
     console.log('🎯 Tentative d\'ouverture story index:', storyIndex, 'Stories disponibles:', availableStories.length);
-    if (availableStories.length > 0) {
+    // Si on reçoit des stories ordonnées (nouveau format), on les utilise
+    if (orderedStories) {
+      setAvailableStories(orderedStories);
+    }
+    if ((orderedStories && orderedStories.length > 0) || availableStories.length > 0) {
       setCurrentStoryIndex(storyIndex);
       setIsStoryViewerOpen(true);
     } else {
@@ -142,7 +146,7 @@ const ChatPage = () => {
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
       {/* Container des stories uniquement */}
       <div className="flex-shrink-0 px-4 pt-4 pb-0">
-        <StoriesSection 
+        <StoryContainer 
           usersList={chatList}
           currentUser={currentUser}
           onStoryClick={openStoryViewer}

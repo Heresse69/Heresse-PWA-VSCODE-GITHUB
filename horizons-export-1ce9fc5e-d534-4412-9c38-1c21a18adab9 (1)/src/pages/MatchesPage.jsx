@@ -12,7 +12,8 @@ import { Separator } from '@/components/ui/separator';
 import { useUser } from '@/contexts/UserContext'; 
 import { getMatches, getConversations } from '@/data/mockChatData'; 
 import StoryViewer from '@/components/StoryViewer';
-import StoriesSection from '@/components/StoriesSection';
+import StoryContainer from '@/components/StoryContainer';
+import { applyPWAScrollFix } from '@/utils/pwaScrollFix';
 
 // Composant MatchCard pour afficher chaque profil de match
 const MatchCard = ({ profile, index, conversationId }) => {
@@ -23,28 +24,21 @@ const MatchCard = ({ profile, index, conversationId }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="relative aspect-[3/4] bg-slate-700 rounded-xl overflow-hidden shadow-lg group"
+      className="relative aspect-[3/4] bg-slate-700 rounded-lg overflow-hidden shadow-lg group flex items-center justify-center"
     >
       <img 
         alt={profile.name} 
-        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+        className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" 
         src={profile.avatarImage || `https://source.unsplash.com/random/400x600?person&sig=${profile.id}`} 
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-3 flex flex-col justify-end">
-        <h3 className="text-xl font-bold text-white">{profile.name}, {profile.age || 'N/A'}</h3>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-2 flex flex-col justify-end">
+        <h3 className="text-lg font-bold text-white">{profile.name}, {profile.age || 'N/A'}</h3>
         <p className={`text-xs mb-1 ${profile.online ? 'text-green-300' : 'text-gray-400'}`}>
           {profile.online ? 'En ligne' : (profile.lastActivity || 'Actif récemment')}
         </p>
-        {profile.commonInterests > 0 && (
-          <p className="text-xs text-gray-200 flex items-center">
-            <Heart size={12} className="mr-1 text-pink-400 fill-current" /> 
-            {profile.commonInterests} centres d'intérêt en commun
-          </p>
-        )}
-        {conversationId && (
-          <p className="text-xs text-green-300 flex items-center mt-1">
-            <MessageSquare size={12} className="mr-1" />
-            Conversation active
+        {profile.mediaRating > 0 && (
+          <p className="text-xs text-yellow-300 flex items-center">
+            ⭐ {profile.mediaRating.toFixed(1)} médias
           </p>
         )}
       </div>
@@ -52,11 +46,11 @@ const MatchCard = ({ profile, index, conversationId }) => {
       <Button 
         size="icon" 
         variant="ghost"
-        className="absolute top-2 right-2 bg-black/30 hover:bg-pink-500/70 text-white rounded-full w-9 h-9 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute top-2 right-2 bg-black/30 hover:bg-pink-500/70 text-white rounded-full w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity"
         asChild
       >
         <Link to={chatLink}>
-          <MessageSquare size={18} />
+          <MessageSquare size={16} />
         </Link>
       </Button>
     </motion.div>
@@ -93,6 +87,16 @@ const MatchesPage = () => {
     setMatchedProfilesList(enrichedMatches);
   }, []);
 
+  // Appliquer le fix PWA spécifiquement pour cette page
+  useEffect(() => {
+    // Délai pour s'assurer que le DOM est monté
+    const timer = setTimeout(() => {
+      applyPWAScrollFix();
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [availableStories, setAvailableStories] = useState([]);
@@ -110,9 +114,13 @@ const MatchesPage = () => {
     setAvailableStories(stories);
   };
 
-  const openStoryViewer = (storyIndex) => {
+  const openStoryViewer = (storyIndex, orderedStories = null) => {
     console.log('🎯 Ouverture story index:', storyIndex, 'Stories disponibles:', availableStories.length);
-    if (availableStories.length > 0) {
+    // Si on reçoit des stories ordonnées (nouveau format), on les utilise
+    if (orderedStories) {
+      setAvailableStories(orderedStories);
+    }
+    if ((orderedStories && orderedStories.length > 0) || availableStories.length > 0) {
       setCurrentStoryIndex(storyIndex);
       setIsStoryViewerOpen(true);
     } else {
@@ -188,7 +196,7 @@ const MatchesPage = () => {
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 to-slate-800 text-white overflow-hidden">
       {/* Container des stories uniquement */}
       <div className="flex-shrink-0 px-4 pt-4 pb-0">
-        <StoriesSection 
+        <StoryContainer 
           usersList={matchedProfilesList}
           currentUser={currentUser}
           onStoryClick={openStoryViewer}
@@ -216,9 +224,15 @@ const MatchesPage = () => {
           initialIndex={currentStoryIndex}
           onClose={closeStoryViewer}
         />
-      )}
-
-      <div className="flex-1 overflow-y-auto px-4 pb-20">
+      )}        <div 
+          className="flex-1 overflow-y-auto px-4 pb-20 matches-container"
+          data-scrollable="true"
+          style={{
+            overflowY: 'scroll',
+            WebkitOverflowScrolling: 'touch',
+            height: 'auto'
+          }}
+        >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">
             Vos matchs ({sortedProfiles.length})
@@ -330,7 +344,7 @@ const MatchesPage = () => {
         )}
 
         {sortedProfiles.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 pb-4">
             {sortedProfiles.map((profile, index) => (
               <MatchCard 
                 key={profile.id} 
